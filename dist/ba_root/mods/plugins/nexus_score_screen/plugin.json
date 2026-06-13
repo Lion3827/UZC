@@ -1,0 +1,6 @@
+{
+    "name": "nexus_score_screen",
+    "version": "1.0.0",
+    "enabled": true,
+    "priority": 50
+}

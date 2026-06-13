@@ -1,0 +1,384 @@
+{
+  "accounts": {
+    "pb-IF4GV3AMLQ==": {
+      "role": "alt1"
+    },
+    "pb-IF4JV1NeNg==": {
+      "role": "uzc1"
+    }
+  },
+  "role_defs": {
+    "altpha_season": {
+      "text": "ALTpha",
+      "color_stops": [
+        [
+          0.498,
+          0.498,
+          0.498
+        ]
+      ],
+      "anim": "silver_wave",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": []
+    },
+    "uzc1": {
+      "text": "UZC",
+      "color_stops": [
+        [
+          0.29,
+          0.56,
+          0.89
+        ]
+      ],
+      "anim": "pulse",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [
+        "nv",
+        "dv"
+      ]
+    },
+    "uzc2": {
+      "text": "UZC",
+      "color_stops": [
+        [
+          0.18,
+          0.42,
+          1.0
+        ]
+      ],
+      "anim": "wave_bright",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [
+        "nv",
+        "dv"
+      ]
+    },
+    "uzc3": {
+      "text": "UZC",
+      "color_stops": [
+        [
+          0.35,
+          0.24,
+          1.0
+        ],
+        [
+          0.18,
+          0.42,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "enter": "wave_in",
+      "wave_speed": 0.9,
+      "commands": [
+        "nv",
+        "dv"
+      ]
+    },
+    "uzc4": {
+      "text": "UZC",
+      "color_stops": [
+        [
+          0.55,
+          0.18,
+          1.0
+        ],
+        [
+          0.35,
+          0.0,
+          0.9
+        ]
+      ],
+      "anim": "color_travel",
+      "enter": "wave_in",
+      "wave_speed": 1.0,
+      "commands": [
+        "nv",
+        "dv"
+      ]
+    },
+    "alt1": {
+      "text": "ALT",
+      "color_stops": [
+        [
+          0.18,
+          0.49,
+          0.2
+        ]
+      ],
+      "anim": "pulse",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [
+        "nv",
+        "dv"
+      ]
+    },
+    "alt2": {
+      "text": "ALT",
+      "color_stops": [
+        [
+          0.98,
+          0.66,
+          0.15
+        ]
+      ],
+      "anim": "wave_bright",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [
+        "nv",
+        "dv"
+      ]
+    },
+    "alt3": {
+      "text": "ALT",
+      "color_stops": [
+        [
+          0.94,
+          0.42,
+          0.0
+        ],
+        [
+          0.98,
+          0.66,
+          0.15
+        ]
+      ],
+      "anim": "wave",
+      "enter": "wave_in",
+      "wave_speed": 0.9,
+      "commands": [
+        "nv",
+        "dv"
+      ]
+    },
+    "alt4": {
+      "text": "ALT",
+      "color_stops": [
+        [
+          0.78,
+          0.16,
+          0.16
+        ],
+        [
+          0.94,
+          0.42,
+          0.0
+        ]
+      ],
+      "anim": "color_travel",
+      "enter": "wave_in",
+      "wave_speed": 1.0,
+      "commands": [
+        "nv",
+        "dv"
+      ]
+    },
+    "umbr_alt": {
+      "text": "Umbr-ALT",
+      "color_stops": [
+        [
+          0.16,
+          0.0,
+          0.62
+        ]
+      ],
+      "anim": "umbr_wave",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [
+        "nv",
+        "dv"
+      ]
+    }
+  },
+  "role_perms": {},
+  "tags": {
+    "pb-IF4TUGwtVg==": {
+      "text": "barba negra",
+      "color_stops": [
+        [
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF5VXnAjLA==": {
+      "text": "VIP ",
+      "color_stops": [
+        [
+          1.0,
+          0.2,
+          0.2
+        ],
+        [
+          0.2,
+          0.4,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF5QXmI_JA==": {
+      "text": "noobsito",
+      "color_stops": [
+        [
+          0.2,
+          0.4,
+          1.0
+        ],
+        [
+          0.2,
+          0.9,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF4IUEccXQ==": {
+      "text": "oso blanco",
+      "color_stops": [
+        [
+          0.2,
+          0.4,
+          1.0
+        ],
+        [
+          1.0,
+          0.5,
+          0.1
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF4NVU4vFg==": {
+      "text": "gordo",
+      "color_stops": [
+        [
+          1.0,
+          0.5,
+          0.1
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF4vVFNYFA==": {
+      "text": "egg",
+      "color_stops": [
+        [
+          0.2,
+          0.9,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF4GV3AMLQ==": {
+      "text": "PENUMBRAPHANTASM",
+      "color_stops": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.941,
+          1.0,
+          0.0
+        ],
+        [
+          0.059,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.275,
+          0.808
+        ],
+        [
+          0.6,
+          0.0,
+          0.788
+        ],
+        [
+          0.62,
+          0.859,
+          0.976
+        ],
+        [
+          0.925,
+          0.255,
+          0.255
+        ],
+        [
+          0.937,
+          0.443,
+          0.208
+        ],
+        [
+          0.98,
+          0.961,
+          0.671
+        ],
+        [
+          0.373,
+          0.733,
+          0.306
+        ],
+        [
+          1.0,
+          0.4,
+          0.4
+        ],
+        [
+          1.0,
+          0.741,
+          0.333
+        ],
+        [
+          1.0,
+          1.0,
+          0.4
+        ],
+        [
+          0.616,
+          0.886,
+          0.31
+        ],
+        [
+          0.529,
+          0.808,
+          0.98
+        ]
+      ],
+      "anim": "rainbow",
+      "enter": "wave_in",
+      "wave_speed": 0.8
+    }
+  },
+  "hierarchy": {
+    "owner": [
+      "pb-IF4nUW8SIg==",
+      "pb-IF4GV3AMLQ=="
+    ],
+    "admin": [],
+    "staff": []
+  },
+  "effects": {},
+  "season_rewards": {
+    "top1_pending": "pb-IF4KVWgJIw=="
+  }
+}

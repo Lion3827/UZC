@@ -1,0 +1,6 @@
+{
+    "enabled": true,
+    "priority": 20,
+    "version": "1.0",
+    "name": "live_chat"
+}

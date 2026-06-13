@@ -1,0 +1,6 @@
+{
+    "name": "hud_ladder",
+    "version": "1.0.0",
+    "enabled": true,
+    "priority": 60
+}

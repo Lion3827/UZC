@@ -1,0 +1,6 @@
+{
+  "name": "powerups",
+  "version": "1.0.0",
+  "enabled": false,
+  "priority": 60
+}

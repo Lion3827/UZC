@@ -1,0 +1,186 @@
+{
+  "_info": "server_config.json — Configuración maestra del servidor UZC. Leído por custom_hooks.py al inicio del servidor. Los campos que empiezan con _ son comentarios internos y son ignorados por el código.",
+  "server": {
+    "_desc": "Información general del servidor. Estos valores se muestran en la lista pública de BombSquad.",
+    "name": "SalsaDiamond",
+    "public_party_name": "/ue043Build",
+    "region": "SA",
+    "max_players": 8
+  },
+  "plugins": {
+    "perms": {
+      "_core": true,
+      "_desc": "Sistema de roles y permisos del servidor. Guarda todo en perms_data.json. Es la base del stack — tag lee roles de aquí para mostrar visuals, cmds lo usa para verificar permisos, nuke para saber quién puede usarlo, y el bot para asignar roles al verificar en Discord.",
+      "_warning": "⛔ NUNCA desactivar. Rompe tag, cmds, nuke y la verificación de Discord en cascada.",
+      "_editable": false,
+      "enabled": true
+    },
+    "stats": {
+      "_core": true,
+      "_desc": "Sistema de estadísticas de jugadores. Registra kills, muertes, NS (puntos de ranking), división (Madera → Leyenda), KD, win ratio, racha y clanes. Tag y hud_ladder leen de aquí para mostrar datos en pantalla. El bot también consulta stats para el canal ladder de Discord.",
+      "_warning": "⛔ NUNCA desactivar. Falla en cascada: tag pierde datos de división, hud_ladder no puede mostrar el ranking, y el bot pierde información de jugadores.",
+      "_editable": true,
+      "enabled": true,
+      "config": {
+        "ladder_reset_days": {
+          "_desc": "Cada cuántos días se reinicia el ranking (posiciones en el ladder). Al reiniciarse, las posiciones se recalculan desde cero pero el NS no desaparece completamente.",
+          "_warning": "No bajar de 7 días o el ladder se resetea muy seguido y pierde sentido competitivo.",
+          "_editable": true,
+          "value": 15
+        },
+        "ns_reset_days": {
+          "_desc": "Cada cuántos días se reinicia el NS (puntos de división) de todos los jugadores. Determina la duración de la temporada.",
+          "_warning": "No bajar de 14 días. Los jugadores en Leyenda pierden menos NS al resetear que el resto.",
+          "_editable": true,
+          "value": 21
+        }
+      }
+    },
+    "tag": {
+      "_core": false,
+      "_desc": "Tags visuales flotantes sobre los jugadores en partida. Muestra el rol del jugador (Owner, Admin, UZC I–IV, ALT I–IV, etc.), su división actual según NS, e íonos del juego. Lee datos de perms para los roles y de stats para la división. Si lo desactivas, los jugadores no verán ningún tag ni rango visual encima de los personajes. Nada más se rompe.",
+      "_warning": "✅ Seguro desactivar. Solo afecta la parte visual en pantalla.",
+      "_editable": false,
+      "enabled": true
+    },
+    "cmds": {
+      "_core": true,
+      "_desc": "Motor de todos los comandos de chat del servidor. Carga tres categorías: 'all' (comandos generales como /help, /stats, /rank, /ping, /report), 'admin' (moderación: /kick, /mute, /ban, etc.) y 'trolls' (comandos de diversión con permisos especiales). Sin este plugin no existe ningún comando en el servidor.",
+      "_warning": "⚠ No recomendado desactivar. Perms y tag siguen funcionando, pero no tendrás ninguna forma de usar comandos de administración ni de interacción.",
+      "_editable": false,
+      "enabled": true
+    },
+    "tag_bot": {
+      "_core": true,
+      "_desc": "Bot de Discord del servidor (Sara). Toda su configuración de canales, webhooks, token y roles vive en bot_config.json — no duplicar nada aquí. Maneja verificación de jugadores vía tickets, relay de live players, canal ladder, logs y comandos de Discord. Si lo desactivas, el puente BS↔Discord se corta completamente.",
+      "_warning": "⛔ NUNCA desactivar. Rompe la verificación, live_chat, el canal de jugadores en vivo y todos los logs de Discord.",
+      "_editable": false,
+      "enabled": true
+    },
+    "hud_ladder": {
+      "_core": false,
+      "_desc": "HUD visible en pantalla durante la partida. Muestra el top 10 de jugadores con su posición, kills, KD y win ratio en tiempo real. También muestra un contador de días hasta el próximo reset del ladder y mensajes de tip rotativos en la parte inferior de la pantalla con efecto de máquina de escribir. Lee datos de stats.",
+      "_warning": "✅ Seguro desactivar. Solo desaparece el HUD visual. Stats y el ranking siguen funcionando.",
+      "_editable": true,
+      "enabled": true,
+      "config": {
+        "update_interval": {
+          "_desc": "Cada cuántos segundos se actualiza el top 10 del HUD con datos frescos de stats.",
+          "_warning": "No bajar de 10 — actualizar muy seguido puede afectar rendimiento en partidas con muchos jugadores.",
+          "_editable": true,
+          "value": 30
+        },
+        "tip_interval": {
+          "_desc": "Cada cuántos segundos cambia el mensaje de tip en la parte inferior de la pantalla.",
+          "_warning": "No bajar de 5.",
+          "_editable": true,
+          "value": 8
+        },
+        "tips": {
+          "_desc": "Lista de mensajes rotativos que aparecen en la parte inferior de la pantalla con efecto de máquina de escribir. Puedes editar, agregar o eliminar los que quieras. Los íonos al inicio son caracteres especiales de BombSquad — no los cambies por emojis normales o aparecerán como cuadros.",
+          "_warning": "✅ Totalmente editable. Solo respetar el formato de lista de texto.",
+          "_editable": true,
+          "value": [
+            " Usa /help para ver todos los comandos disponibles",
+            " Escribe /stats para ver tus estadisticas de juego",
+            " Sube de division acumulando NS en cada partida",
+            " El KD y win ratio determinan tu posicion en el ladder",
+            " Usa /report para reportar jugadores que hagan trampa",
+            " Escribe /top para ver el top 5 del servidor",
+            " El ladder se reinicia cada 15 dias. El NS cada 21",
+            " Unete a nuestro Discord desde el menu Estadisticas",
+            " Mata mas y muere menos para subir en el ladder",
+            " Tu division depende de tu NS acumulado",
+            " Ganar partidas mejora tu win ratio y tu ranking",
+            " En Leyenda el NS no baja tanto al reinicio de temporada",
+            " Anuncios y recompensas exclusivas en nuestro Discord",
+            " Usa /ping para ver tu latencia actual",
+            " Escribe /rank para saber tu posicion exacta en el ranking",
+            " El streak mas alto te da bonificacion de NS",
+            " Escribe /ns para entender como funciona el sistema de puntos",
+            " Usa /report solo cuando sea necesario. El abuso tiene sancion",
+            " Cada fin de temporada los mejores jugadores reciben premios",
+            " Reportar sin razon puede resultar en sancion"
+          ]
+        }
+      }
+    },
+    "live_chat": {
+      "_core": false,
+      "_desc": "Relay de mensajes de chat entre BombSquad y Discord en tiempo real. Los mensajes del juego llegan al canal de Discord con el nombre, personaje y color del jugador. También funciona al revés: los mensajes escritos desde Discord se muestran en el chat del juego. Ignora comandos (/) y mensajes del servidor. Toda la config de canales y webhooks vive en bot_config.json. Depende de tag_bot para funcionar.",
+      "_warning": "✅ Seguro desactivar. Solo pierdes el relay de chat. El bot y la verificación siguen funcionando.",
+      "_editable": true,
+      "enabled": true,
+      "config": {
+        "max_messages": {
+          "_desc": "Cuántos mensajes se guardan en el buffer de chat.json antes de eliminar los más viejos. Afecta cuántos mensajes recientes puede mostrar el bot de Discord.",
+          "_warning": "No subir demasiado — el archivo crece con cada mensaje.",
+          "_editable": true,
+          "value": 50
+        }
+      }
+    },
+    "chatlog": {
+      "_core": false,
+      "_desc": "Buffer interno en memoria de los últimos 50 mensajes del chat del servidor (account_id, nombre, mensaje). Usado internamente por otros módulos que necesiten historial reciente de chat sin leer archivos. No guarda nada en disco.",
+      "_warning": "✅ Seguro desactivar. Bajo impacto.",
+      "_editable": false,
+      "enabled": true
+    },
+    "effects": {
+      "_core": false,
+      "_desc": "Efectos visuales persistentes que se aplican sobre los jugadores durante la partida. Actualmente incluye CubeAura (cubos orbitando al personaje) y TeslaAura (arcos eléctricos). Se activan mediante comandos de cmds. EN DESARROLLO — puede generar inestabilidad o crasheos. Si lo dejas activo, evita usar los comandos que lo invocan hasta que estén estables.",
+      "_warning": "✅ Seguro desactivar. Si lo dejas activo, no uses los comandos de effects en producción.",
+      "_editable": false,
+      "enabled": true
+    },
+    "nuke": {
+      "_core": false,
+      "_desc": "Powerup Nuke activable mediante comando de cmds con permisos. Genera una bomba personalizada en el mapa con cuenta regresiva, luz de color y una explosión masiva que afecta a todos los jugadores en el área. Tiene variante normal (naranja) y de hielo (azul). EN DESARROLLO — puede generar inestabilidad.",
+      "_warning": "✅ Seguro desactivar.",
+      "_editable": true,
+      "enabled": true,
+      "config": {
+        "countdown_seconds": {
+          "_desc": "Cuántos segundos tarda la bomba Nuke en explotar desde que se activa.",
+          "_warning": "No bajar de 5 — muy poco tiempo no da margen de reacción a los jugadores.",
+          "_editable": true,
+          "value": 15
+        },
+        "ice_mode": {
+          "_desc": "Si es true, el Nuke usa textura y color de hielo (azul) en lugar del estilo normal (naranja). Solo es visual, el comportamiento de la explosión es el mismo.",
+          "_editable": true,
+          "value": false
+        }
+      }
+    },
+    "powerups": {
+      "_core": false,
+      "_desc": "Carga powerups extra durante la partida. Incluye dos fuentes: powerups propios del servidor (carpeta plugins/powerups/powerups/) y powerups de terceros de @Patron_powerups (carpeta plugins/powerups/powerups/third_party/). Puedes agregar más powerups propios en la carpeta correspondiente. Solo funcionan mods que usen assets vanilla de BombSquad. Mods con modelos externos, texturas custom o assets de Blender no incluidos en el juego base causarán que el cliente sea expulsado del servidor.",
+      "_warning": "✅ 100% seguro activar o desactivar. No afecta nada del stack.",
+      "_editable": true,
+      "enabled": true
+    },
+    "features": {
+      "_core": false,
+      "_desc": "Módulo de un colaborador externo, dejado incompleto. Actualmente solo renderiza un texto 'SnowYoutube' y un logo decorativo en el HUD. No cumple ninguna función útil para el servidor.",
+      "_warning": "⛔ Desactivado por defecto. No activar hasta que el módulo esté terminado.",
+      "_editable": false,
+      "enabled": false
+    },
+    "map_game_loader": {
+      "_core": false,
+      "_desc": "Carga mapas y modos de juego custom al servidor. Los mapas van en plugins/map_game_loader/maps/ y los modos de juego en plugins/map_game_loader/games/. Actualmente incluye los mapas Winner, ScalerasEX, CastilloExtended y Superfortalezaduet, y el modo SuperSmash. Puedes agregar más mapas y modos propios en esas carpetas. Solo funcionan mapas y modos que usen exclusivamente assets vanilla de BombSquad. Mapas con recursos externos (modelos de Blender, texturas custom, assets de otros mods) no funcionarán — el cliente no los tiene y será expulsado del servidor automáticamente.",
+      "_warning": "✅ Seguro desactivar. Solo pierdes los mapas y modos custom — el servidor corre con los mapas vanilla normales.",
+      "_editable": true,
+      "enabled": true
+    },
+    "nexus_score_screen": {
+      "_core": false,
+      "_desc": "Mod propio en desarrollo. Al finalizar cada ronda lanza una lluvia de efectos de celebración en pantalla y muestra el siguiente mapa como fondo en la pantalla de resultados. También genera un podio visual con los 3 primeros jugadores de la ronda. Al finalizar una serie completa, lanza un efecto de lluvia más elaborado.",
+      "_warning": "✅ Seguro desactivar al ser un mod en desarrollo.",
+      "_editable": false,
+      "enabled": true
+    }
+  }
+}

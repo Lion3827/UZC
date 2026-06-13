@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "priority": 99,
+  "version": "1.0.0",
+  "name": "tag_bot"
+}

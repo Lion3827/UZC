@@ -1,0 +1,589 @@
+{
+  "accounts": {},
+  "role_defs": {
+    "owner": {
+      "level": 100,
+      "text": "OWNER",
+      "color_stops": [
+        [
+          1.0,
+          0.8,
+          0.2
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8,
+      "commands": [
+        "all"
+      ],
+      "ids": [
+        "pb-IF4nUW8SIg==",
+        "pb-IF4GV3AMLQ==",
+        "pb-IF4JV1NeNg=="
+      ]
+    },
+    "admin": {
+      "level": 80,
+      "text": "ADMIN",
+      "color_stops": [
+        [
+          0.4,
+          0.7,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8,
+      "commands": [
+        "kick",
+        "ban",
+        "mute",
+        "unmute",
+        "end",
+        "nv",
+        "dv",
+        "tint",
+        "camera",
+        "party",
+        "maxplayers",
+        "lm",
+        "kickvote",
+        "info",
+        "gp",
+        "pause",
+        "slowmo",
+        "sm",
+        "remove",
+        "unban",
+        "ef",
+        "terrain",
+        "role",
+        "tag",
+        "list",
+        "bunny",
+        "kill",
+        "heal",
+        "curse",
+        "shield",
+        "gloves",
+        "freeze",
+        "unfreeze",
+        "sleep",
+        "fly",
+        "invisible",
+        "inv",
+        "headless",
+        "head",
+        "creepy",
+        "creep",
+        "celebrate",
+        "godmode",
+        "gm",
+        "superpunch",
+        "sp",
+        "speed"
+      ],
+      "ids": []
+    },
+    "staff": {
+      "level": 50,
+      "text": "STAFF",
+      "color_stops": [
+        [
+          0.5,
+          0.9,
+          0.6
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8,
+      "commands": [
+        "kick",
+        "mute",
+        "unmute",
+        "end",
+        "nv",
+        "dv",
+        "tint",
+        "camera",
+        "info",
+        "gp",
+        "pause",
+        "slowmo",
+        "sm",
+        "curse",
+        "heal",
+        "shield",
+        "gloves",
+        "freeze",
+        "unfreeze",
+        "head",
+        "inv",
+        "creepy",
+        "creep",
+        "list"
+      ],
+      "ids": []
+    },
+    "mod": {
+      "level": 40,
+      "text": "MOD",
+      "color_stops": [
+        [
+          0.8,
+          0.5,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8,
+      "commands": [
+        "kick",
+        "mute",
+        "unmute",
+        "end",
+        "nv",
+        "dv",
+        "tint",
+        "camera",
+        "info",
+        "gp",
+        "pause",
+        "slowmo",
+        "sm",
+        "bunny",
+        "kill",
+        "heal",
+        "curse",
+        "shield",
+        "gloves",
+        "freeze",
+        "unfreeze",
+        "sleep",
+        "fly",
+        "invisible",
+        "inv",
+        "headless",
+        "head",
+        "creepy",
+        "creep",
+        "celebrate",
+        "superpunch",
+        "sp",
+        "speed",
+        "list"
+      ],
+      "ids": []
+    },
+    "altpha_season": {
+      "level": 30,
+      "text": "ALTpha",
+      "color_stops": [
+        [
+          0.498,
+          0.498,
+          0.498
+        ]
+      ],
+      "anim": "silver_wave",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [],
+      "ids": []
+    },
+    "umbr_alt": {
+      "level": 25,
+      "text": "Umbr-ALT",
+      "color_stops": [
+        [
+          0.16,
+          0.0,
+          0.62
+        ],
+        [
+          0.28,
+          0.0,
+          0.78
+        ],
+        [
+          0.45,
+          0.3,
+          0.7
+        ],
+        [
+          0.5,
+          0.5,
+          0.5
+        ]
+      ],
+      "anim": "color_travel",
+      "enter": "wave_in",
+      "wave_speed": 0.6,
+      "commands": [
+        "nv",
+        "dv"
+      ],
+      "ids": []
+    },
+    "uzc1": {
+      "level": 20,
+      "text": "UZC",
+      "color_stops": [
+        [
+          0.29,
+          0.56,
+          0.89
+        ]
+      ],
+      "anim": "pulse",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [
+        "nv",
+        "dv"
+      ],
+      "ids": [
+        "pb-IF4mUHEEAA==",
+        "pb-IF4UUFEBHQ=="
+      ]
+    },
+    "uzc2": {
+      "level": 20,
+      "text": "UZC",
+      "color_stops": [
+        [
+          0.18,
+          0.42,
+          1.0
+        ]
+      ],
+      "anim": "wave_bright",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [
+        "nv",
+        "dv"
+      ],
+      "ids": []
+    },
+    "uzc3": {
+      "level": 20,
+      "text": "UZC",
+      "color_stops": [
+        [
+          0.35,
+          0.24,
+          1.0
+        ],
+        [
+          0.18,
+          0.42,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "enter": "wave_in",
+      "wave_speed": 0.9,
+      "commands": [
+        "nv",
+        "dv"
+      ],
+      "ids": []
+    },
+    "uzc4": {
+      "level": 20,
+      "text": "UZC",
+      "color_stops": [
+        [
+          0.55,
+          0.18,
+          1.0
+        ],
+        [
+          0.35,
+          0.0,
+          0.9
+        ]
+      ],
+      "anim": "color_travel",
+      "enter": "wave_in",
+      "wave_speed": 1.0,
+      "commands": [
+        "nv",
+        "dv"
+      ],
+      "ids": []
+    },
+    "alt1": {
+      "level": 10,
+      "text": "ALT",
+      "color_stops": [
+        [
+          0.18,
+          0.49,
+          0.2
+        ]
+      ],
+      "anim": "pulse",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [
+        "nv",
+        "dv"
+      ],
+      "ids": [
+        "pb-JiNJARFeXEFGXl1FFUBRXVZHFUdZQVdE",
+        "pb-IF4GV3AMLQ=="
+      ]
+    },
+    "alt2": {
+      "level": 10,
+      "text": "ALT",
+      "color_stops": [
+        [
+          0.98,
+          0.66,
+          0.15
+        ]
+      ],
+      "anim": "wave_bright",
+      "enter": "wave_in",
+      "wave_speed": 0.8,
+      "commands": [
+        "nv",
+        "dv"
+      ],
+      "ids": []
+    },
+    "alt3": {
+      "level": 10,
+      "text": "ALT",
+      "color_stops": [
+        [
+          0.94,
+          0.42,
+          0.0
+        ],
+        [
+          0.98,
+          0.66,
+          0.15
+        ]
+      ],
+      "anim": "wave",
+      "enter": "wave_in",
+      "wave_speed": 0.9,
+      "commands": [
+        "nv",
+        "dv"
+      ],
+      "ids": []
+    },
+    "alt4": {
+      "level": 10,
+      "text": "ALT",
+      "color_stops": [
+        [
+          0.78,
+          0.16,
+          0.16
+        ],
+        [
+          0.94,
+          0.42,
+          0.0
+        ]
+      ],
+      "anim": "color_travel",
+      "enter": "wave_in",
+      "wave_speed": 1.0,
+      "commands": [
+        "nv",
+        "dv"
+      ],
+      "ids": []
+    }
+  },
+  "role_perms": {},
+  "tags": {
+    "pb-IF4TUGwtVg==": {
+      "text": "barba negra",
+      "color_stops": [
+        [
+          1.0,
+          1.0,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF5VXnAjLA==": {
+      "text": "VIP ",
+      "color_stops": [
+        [
+          1.0,
+          0.2,
+          0.2
+        ],
+        [
+          0.2,
+          0.4,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF5QXmI_JA==": {
+      "text": "noobsito",
+      "color_stops": [
+        [
+          0.2,
+          0.4,
+          1.0
+        ],
+        [
+          0.2,
+          0.9,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF4IUEccXQ==": {
+      "text": "oso blanco",
+      "color_stops": [
+        [
+          0.2,
+          0.4,
+          1.0
+        ],
+        [
+          1.0,
+          0.5,
+          0.1
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF4NVU4vFg==": {
+      "text": "gordo",
+      "color_stops": [
+        [
+          1.0,
+          0.5,
+          0.1
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF4vVFNYFA==": {
+      "text": "egg",
+      "color_stops": [
+        [
+          0.2,
+          0.9,
+          1.0
+        ]
+      ],
+      "anim": "wave",
+      "wave_speed": 0.8
+    },
+    "pb-IF4GV3AMLQ==": {
+      "text": "PENUMBRAPHANTASM",
+      "color_stops": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.941,
+          1.0,
+          0.0
+        ],
+        [
+          0.059,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.275,
+          0.808
+        ],
+        [
+          0.6,
+          0.0,
+          0.788
+        ],
+        [
+          0.62,
+          0.859,
+          0.976
+        ],
+        [
+          0.925,
+          0.255,
+          0.255
+        ],
+        [
+          0.937,
+          0.443,
+          0.208
+        ],
+        [
+          0.98,
+          0.961,
+          0.671
+        ],
+        [
+          0.373,
+          0.733,
+          0.306
+        ],
+        [
+          1.0,
+          0.4,
+          0.4
+        ],
+        [
+          1.0,
+          0.741,
+          0.333
+        ],
+        [
+          1.0,
+          1.0,
+          0.4
+        ],
+        [
+          0.616,
+          0.886,
+          0.31
+        ],
+        [
+          0.529,
+          0.808,
+          0.98
+        ]
+      ],
+      "anim": "rainbow",
+      "enter": "wave_in",
+      "wave_speed": 0.8
+    }
+  },
+  "hierarchy": {
+    "owner": [],
+    "admin": [],
+    "staff": []
+  },
+  "effects": {},
+  "season_rewards": {
+    "top1_pending": "pb-IF4KVWgJIw=="
+  }
+}
