@@ -45,13 +45,6 @@ Edita `dist/ba_root/mods/plugins/bot_config.json` con tu token y IDs de Discord.
 
 Edita `dist/ba_root/mods/plugins/perms/perms_data.json` y agrega tu account ID como owner.
 
-### 7. Iniciar el servidor
-
-```bash
-tmux new -s uzc
-./start.sh
-```\```
-
 ### 5. Configurar el bot de Discord
 
 Edita dist/ba_root/mods/plugins/bot_config.json con tu token y IDs de Discord.
@@ -62,26 +55,6 @@ Edita dist/ba_root/mods/plugins/perms/perms_data.json y agrega tu account ID com
 
 ### 7. Iniciar el servidor
 
-\```bash
+```bash
 tmux new -s uzc
 ./start.sh
-\```
-
-## Comandos
-
-| Comando | Descripción |
-|---------|-------------|
-| /ban <id> [razon] | Banea un jugador permanentemente |
-| /unban <account_id> | Desbanea un jugador |
-| /kill | Mata a un jugador |
-| /heal | Cura a un jugador |
-| /sm | Activa/desactiva slow motion |
-
-## Plugins
-
-- perms — roles, permisos y sistema de ban
-- cmds — comandos de chat
-- custom_hooks — hooks de sesión y ban automático
-- stats — estadísticas de jugadores
-- live_chat — integración con Discord
-- tag_bot — bot de verificación de cuentas
