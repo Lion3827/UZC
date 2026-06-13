@@ -7,3 +7,4 @@ dist/ba_root/mods/nexus_data/
 dist/ba_root/server_logs/
 *.log
 dist/ba_root/plugins/
+dist/ba_root/cache/
