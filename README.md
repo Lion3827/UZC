@@ -1,4 +1,3 @@
-```markdown
 # UZC - BombSquad Server
 
 Servidor competitivo de BombSquad corriendo en Ballistica API 9.
@@ -54,4 +53,4 @@ Edita `dist/ba_root/mods/plugins/perms/perms_data.json` y agrega tu account ID c
 ### Bot de Discord
 
 Edita `dist/ba_root/mods/plugins/bot_config.json` con tu token y IDs de Discord.
-```
+`
