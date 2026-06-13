@@ -1,9 +1,9 @@
 # Datos sensibles
 dist/ba_root/mods/plugins/perms/banned.json
 dist/ba_root/mods/plugins/perms/perms_data.json
-dist/ba_root/mods/bot_config.json
 dist/ba_root/mods/config.json
 dist/ba_root/mods/*.toml
 dist/ba_root/mods/nexus_data/
 dist/ba_root/server_logs/
 *.log
+dist/ba_root/plugins/
