@@ -1,20 +1,20 @@
 {
-  "token": "MTUwNDcyMzQzMzQyOTI3NDcyNA.GQ8ugt.9PL9f0q9o9E1lVw7Vrr9yZMjl9qnqfrq1ugV34",
-  "guild_id": 1503848004665213160,
-  "allowed_role": 1504729014051410011,
+  "token": "",
+  "guild_id": 0,
+  "allowed_role": 0,
   "channels": {
-    "live_chat": 1505264670510944378,
-    "live_players": 1507092307906658405,
-    "ladder": 1508309981265657948,
-    "verify": 1513254574285132016,
-    "logs": 1513670139055181964
+    "live_chat": 0,
+    "live_players": 0,
+    "ladder": 0,
+    "verify": 0,
+    "logs": 0
   },
   "webhooks": {
-    "chat": "https://discord.com/api/webhooks/1505678891732177039/mcXAXeBUtzpDlKJCqvJqPOUNykTFJgzvaewXq92MhnbT0iwS49gurJL9PyBpKoVm9D2m",
-    "reports": "https://discord.com/api/webhooks/1506578333536882729/BduAvfDBMzTFhGZPnB2-W3Q2tw_xIA3J4ExpIRwOGHGUzO91jEIsFL4Muu0fYx2SkqHX"
+    "chat": "",
+    "reports": ""
   },
   "roles": {
-    "uzc": 1513271215177994442,
-    "alt": 1503992593623678986
+    "uzc": 0,
+    "alt": 0
   }
 }
