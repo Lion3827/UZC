@@ -1,6 +1,6 @@
 # UZC - BombSquad Server
 
-Servidor competitivo de BombSquad corriendo en Ballistica API 9.
+Servidor personalizado de BombSquad.
 
 ## Requisitos
 
