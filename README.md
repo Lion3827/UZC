@@ -13,29 +13,44 @@ Servidor competitivo de BombSquad corriendo en Ballistica API 9.
 
 ### 1. Instalar dependencias del sistema
 
-\```bash
+```bash
 sudo apt install python3.13 python3.13-dev python3-pip tmux -y
-\```
+```
 
 ### 2. Instalar dependencias de Python
 
-\```bash
+```bash
 pip3 install aiohttp discord.py pillow requests
-\```
+```
 
 ### 3. Clonar el repositorio
 
-\```bash
+```bash
 git clone https://github.com/Lion3827/UZC
 cd UZC
-\```
+```
 
 ### 4. Dar permisos de ejecución
 
-\```bash
+```bash
 chmod +x start.sh
 chmod +x dist/bombsquad_headless
-\```
+```
+
+### 5. Configurar el bot de Discord
+
+Edita `dist/ba_root/mods/plugins/bot_config.json` con tu token y IDs de Discord.
+
+### 6. Configurar permisos
+
+Edita `dist/ba_root/mods/plugins/perms/perms_data.json` y agrega tu account ID como owner.
+
+### 7. Iniciar el servidor
+
+```bash
+tmux new -s uzc
+./start.sh
+```\```
 
 ### 5. Configurar el bot de Discord
 
