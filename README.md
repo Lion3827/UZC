@@ -70,9 +70,3 @@ Edita dist/ba_root/mods/plugins/bot_config.json con tu token y IDs de Discord.
 ### 6. Configurar permisos
 
 Edita dist/ba_root/mods/plugins/perms/perms_data.json y agrega tu account ID como owner.
-
-### 7. Iniciar el servidor
-
-```bash
-tmux new -s uzc
-./start.sh
