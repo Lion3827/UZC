@@ -37,6 +37,24 @@ chmod +x start.sh
 chmod +x dist/bombsquad_headless
 ```
 
+### 5. Iniciar el servidor
+
+```bash
+tmux new -s uzc
+./start.sh
+```
+
+## Configuración opcional
+
+### Agregar owner
+
+Edita `dist/ba_root/mods/plugins/perms/perms_data.json` y agrega tu account ID como owner.
+
+### Bot de Discord
+
+Edita `dist/ba_root/mods/plugins/bot_config.json` con tu token y IDs de Discord.
+``````
+
 ### 5. Configurar el bot de Discord
 
 Edita `dist/ba_root/mods/plugins/bot_config.json` con tu token y IDs de Discord.
