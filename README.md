@@ -19,7 +19,8 @@ sudo apt install python3.13 python3.13-dev python3-pip tmux -y
 
 ### 2. Instalar dependencias de Python
 
-```pip3 install aiohttp discord.py pillow requests numpy
+```bash
+pip3 install aiohttp discord.py pillow requests numpy
 ```
 
 ### 3. Clonar el repositorio
