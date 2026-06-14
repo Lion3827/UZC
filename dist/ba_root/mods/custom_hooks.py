@@ -142,12 +142,6 @@ ClassicAppMode.on_activate = _new_classic_activate
 
 
 def _on_classic_app_mode_active() -> None:
-    try:
-        import salsadiamond
-        salsadiamond.set_server_name("Patata")
-        print("[hooks] salsadiamond: server name set")
-    except Exception as e:
-        print(f"[hooks] salsadiamond failed: {e}")
     def _set_name() -> None:
         try:
             bs.set_public_party_name("/ue043Build")
@@ -196,15 +190,6 @@ class _CrashHandler(logging.Handler):
 # ba_meta export babase.Plugin
 class HooksPlugin(babase.Plugin):
     def on_app_running(self) -> None:
-        try:
-            _ml_path = os.path.join(os.path.dirname(__file__), 'plugins', 'maps_loader', 'maps_loader.py')
-            _spec = importlib.util.spec_from_file_location('_maps_loader_early', _ml_path)
-            _mod = importlib.util.module_from_spec(_spec)
-            sys.modules['_maps_loader_early'] = _mod
-            _spec.loader.exec_module(_mod)
-            _mod.scan()
-        except Exception as e:
-            print(f'[hooks] maps early load failed: {e}')
         warnings.filterwarnings('ignore', message='.*WeakCallStrict.*')
         handler = _CrashHandler()
         handler.setLevel(logging.WARNING)

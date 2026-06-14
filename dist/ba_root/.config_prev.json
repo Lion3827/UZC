@@ -184,10 +184,9 @@
   ]
  },
  "Default Player Profiles": {
-  "Client Input Device #1": "_random",
   "Client Input Device #2": "__account__",
   "Client Input Device #3": "_random",
-  "Client Input Device #4": "oso insano \ud83d\udcaf",
+  "Client Input Device #4": "__account__",
   "Client Input Device #5": "Barney",
   "Client Input Device #6": "__account__",
   "Client Input Device #7": "alonso",
@@ -198,14 +197,14 @@
  "Fleet Zone Ping Last Flush Time": 1781045093,
  "Fleet Zone Pings": {
   "prod": {
-   "buenos_aires.v4": 52.73563506529972,
-   "lima.v4": 1.6981864478867326,
-   "santiago.v4": 35.85501660972067,
-   "sao_paulo.v4": 80.59074440619784
+   "buenos_aires.v4": 125.82101018272806,
+   "lima.v4": 88.2776146212127,
+   "santiago.v4": 115.48004699335434,
+   "sao_paulo.v4": 111.75464861746877
   }
  },
  "Fleet Zone Pings Updated Time": {
-  "prod": 1781383749
+  "prod": 1781463713
  },
  "Free-for-All Playlist Randomize": true,
  "Free-for-All Playlist Selection": "Copia de Lista de juegos Todos contra Todos Por Defecto",
@@ -900,7 +899,7 @@
  },
  "Teams Series Length": 7,
  "Use Native Python REPL": false,
- "launchCount": 568,
+ "launchCount": 574,
  "lc14173": 1,
  "lc14292": 1
 }

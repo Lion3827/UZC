@@ -104,16 +104,5 @@ def _filter_chat_hook(msg: str, client_id: int) -> str | None:
 
 
 def enable() -> None:
-    try:
-        from baclassic._appmode import ClassicAppMode
-        _orig = ClassicAppMode.handle_remote_chat_message
-        def _patched(self, msg, client_id):
-            if _filter_chat_hook(msg, client_id) is None:
-                return
-            _orig(self, msg, client_id)
-        ClassicAppMode.handle_remote_chat_message = _patched
-        print("[cmds] chat hook registrado")
-    except Exception as e:
-        print(f"[cmds] error registrando chat hook: {e}")
     _load_cmds()
     print(f'[cmds] loaded — {len(_CMDS)} cmds: {", ".join(_CMDS.keys())}')
