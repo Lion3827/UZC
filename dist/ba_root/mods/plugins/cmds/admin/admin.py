@@ -240,11 +240,16 @@ def cmd_role(sp: object, args: list) -> None:
         if not target_acc:
             _reply(f'Client {target_cid} no encontrado.')
             return
-        caller_role  = _perms.get_role(acc)
-        caller_level = _perms.get_role_level(caller_role)
-        target_level = _perms.get_role_level(role_name)
-        if target_level <= caller_level and caller_role != 'owner':
-            _reply('No podes asignar un rol igual o superior al tuyo.')
+        caller_role    = _perms.get_role(acc)
+        caller_level   = _perms.get_role_level(caller_role)
+        target_role    = _perms.get_role(target_acc)
+        target_cur_lvl = _perms.get_role_level(target_role)
+        new_role_level = _perms.get_role_level(role_name)
+        if new_role_level >= caller_level:
+            _reply(f'No podes asignar un rol igual o superior al tuyo (level {caller_level}).')
+            return
+        if target_cur_lvl >= caller_level:
+            _reply('No podes modificar el rol de alguien con nivel igual o superior al tuyo.')
             return
         _perms.set_account_role(target_acc, role_name)
         try:
@@ -268,6 +273,13 @@ def cmd_role(sp: object, args: list) -> None:
         if not target_acc:
             _reply(f'Client {target_cid} no encontrado.')
             return
+        caller_role    = _perms.get_role(acc)
+        caller_level   = _perms.get_role_level(caller_role)
+        target_role    = _perms.get_role(target_acc)
+        target_cur_lvl = _perms.get_role_level(target_role)
+        if target_cur_lvl >= caller_level:
+            _reply('No podes remover el rol de alguien con nivel igual o superior al tuyo.')
+            return
         _perms.remove_account_role(target_acc)
         try:
             from plugins.tag import tag as _tag
@@ -278,29 +290,48 @@ def cmd_role(sp: object, args: list) -> None:
         _reply('Rol removido.')
 
     elif sub == 'create':
-        if _perms.get_role(acc) != 'owner':
-            _reply('Solo el owner puede crear roles.')
+        caller_role  = _perms.get_role(acc)
+        caller_level = _perms.get_role_level(caller_role)
+        if caller_level < 80:
+            _reply('No tenes permiso para crear roles.')
             return
-        if len(args) < 3:
-            _reply('Uso: /role create <nombre_> <color>')
+        if len(args) < 4:
+            _reply('Uso: /role create <level> <nombre_> <color>')
             _reply('[-anim wave_bright|rainbow|pulse|static] [-enter drop_in|explode_in|spin_in]')
             _reply('Colores: red blue green gold cyan')
             _reply('purple pink orange white lime teal | #RRGGBB')
             return
-        role_name = args[1].lower().replace('_', ' ')
-        result    = _parse_tag_args(args[2:])
+        try:
+            new_level = int(args[1])
+        except ValueError:
+            _reply('Level invalido. Debe ser un numero entero.')
+            return
+        if new_level <= 0:
+            _reply('Level debe ser mayor a 0.')
+            return
+        if new_level >= caller_level:
+            _reply(f'No podes crear un rol con level {new_level}. Tu level es {caller_level}.')
+            return
+        role_name = args[2].lower().replace('_', ' ')
+        result    = _parse_tag_args(args[3:])
         if result is None:
             _reply('Color invalido.')
             return
         color_stops, anim, enter, wave_speed = result
+        if role_name in _perms.get_all_roles():
+            _reply(f'El rol {role_name.upper()} ya existe.')
+            return
         _perms.create_role(role_name, {
+            'level':       new_level,
             'text':        role_name.upper(),
             'color_stops': [list(c) for c in color_stops],
             'anim':        anim,
             'enter':       enter,
             'wave_speed':  wave_speed,
+            'commands':    [],
+            'ids':         [],
         })
-        _reply(f'Rol {role_name.upper()} creado.')
+        _reply(f'Rol {role_name.upper()} creado (level {new_level}).')
 
     elif sub == 'addcmd':
         if _perms.get_role(acc) != 'owner':
