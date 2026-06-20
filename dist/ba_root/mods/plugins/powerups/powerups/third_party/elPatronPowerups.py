@@ -6,7 +6,6 @@ _sp_ = ('\n')
 import babase
 import bauiv1 as bui
 
-from bauiv1lib.profile import browser
 from bascenev1lib.actor import bomb
 from bascenev1lib.actor import powerupbox as pupbox
 from bascenev1lib.actor.spazbot import SpazBot
@@ -16,6 +15,8 @@ from bascenev1lib.actor.popuptext import PopupText
 from bauiv1lib.confirm import ConfirmWindow
 from bascenev1lib.actor.spaz import *
 from bascenev1lib.actor.bomb import BombFactory
+from bascenev1lib.gameutils import SharedObjects
+from bascenev1lib.actor import spazbot as bots
 
 
 if TYPE_CHECKING:
@@ -251,7 +252,7 @@ config = apg['PPM Settings']
 
 
 def default_powerups():
-    defaults = {'Shield': 3, 'Punch': 3, 'Mine Bombs': 3, 'Impact Bombs': 3, 'Ice Bombs': 3, 'Triple': 3, 'Sticky Bombs': 3, 'Curse': 3, 'Health': 3, 'Speed': 3, 'Healing Damage': 3, 'Goodbye': 3, 'Ice Man': 3, 'Tank Shield': 3, 'Impairment Bombs': 3, 'Fire Bombs': 0, 'Fly Bombs': 3, 'Bomb Cena': 3, 'Red Shield': 3}
+    defaults = {'Shield': 3, 'Punch': 3, 'Mine Bombs': 3, 'Impact Bombs': 3, 'Ice Bombs': 3, 'Triple': 3, 'Sticky Bombs': 3, 'Curse': 3, 'Health': 3, 'Speed': 3, 'Healing Damage': 3, 'Goodbye': 3, 'Ice Man': 3, 'Tank Shield': 3, 'Impairment Bombs': 3, 'Fire Bombs': 0, 'Fly Bombs': 3, 'Bomb Cena': 3, 'Red Shield': 3, 'supplies': 3, 'superhuman_healing': 1, 'super_shield': 2, 'T784_bomb': 3, 'blackhole_bomb': 1, 'Xfactor_bomb': 3, 'gloo_wall_bomb': 3, 'nitrogen_bomb': 3, 'stun_bomb': 3, 'teleport_bomb': 2, 's.m.b_bomb': 2, 'attraction_bomb': 2, 'cosmic_bomb': 1, 'electro-bombs': 3, 'cosmic_box': 1}
     if apg.get('PPM Powerups') is None:
         apg['PPM Powerups'] = defaults
     for k, v in defaults.items():
@@ -269,6 +270,32 @@ powerups = config['Powerups']
 GLOBAL = {"Tab": 'Action 1',
           "Cls Powerup": 0,
           "Coins Message": []}
+
+_original_drop_bomb = None
+all_bombs: list = ["curative", "s.m.b", "Xfactor"]
+ex_calls: dict = dict()
+
+class ExBuilder:
+    cooldown_t784: float = 0.1
+    hitpoints_t784: int = 840
+    max_cure_t784: int = 180
+    min_cure_t784: int = 35
+    size_t784: float = 12.0
+    damage_t784: int = 280
+    duration_gw: int = 15
+    duration_cb: int = 3
+    extra_power_cb: float = 1.5
+    damage_eb: int = 40
+    repeat_eb: int = 9
+    eff_eb: float = 0.2
+    sombrita_hp: int = 3000
+    shield_hitpoints_sh: int = 30
+    percentage_sh: int = 25
+    time_sh: float = 1.5
+    reduction_ss: int = 90
+    duration_ss: int = 7
+
+ex = ExBuilder
 
 
 # === STORE ===
@@ -493,7 +520,22 @@ def powerup_dist():
             ('fire_bombs', powerups['Fire Bombs']),
             ('fly_bombs', powerups['Fly Bombs']),
             ('bomb_cena', powerups['Bomb Cena']),
-            ('red_shield', powerups['Red Shield']))
+            ('red_shield', powerups['Red Shield']),
+            ('supplies', powerups['supplies']),
+            ('superhuman_healing', powerups['superhuman_healing']),
+            ('super_shield', powerups['super_shield']),
+            ('T784_bomb', powerups['T784_bomb']),
+            ('blackhole_bomb', powerups['blackhole_bomb']),
+            ('Xfactor_bomb', powerups['Xfactor_bomb']),
+            ('gloo_wall_bomb', powerups['gloo_wall_bomb']),
+            ('attraction_bomb', powerups['attraction_bomb']),
+            ('cosmic_bomb', powerups['cosmic_bomb']),
+            ('electro-bombs', powerups['electro-bombs']),
+            ('cosmic_box', powerups['cosmic_box']),
+            ('nitrogen_bomb', powerups['nitrogen_bomb']),
+            ('stun_bomb', powerups['stun_bomb']),
+            ('teleport_bomb', powerups['teleport_bomb']),
+            ('s.m.b_bomb', powerups['s.m.b_bomb']))
 
 
 def percentage_tank_shield():
@@ -510,53 +552,6 @@ def percentage_health_damage():
 
 # === Modify class ===
 
-class NewProfileBrowserWindow(browser.ProfileBrowserWindow):
-    def __init__(self,
-                 transition: str = 'in_right',
-                 in_main_menu: bool = True,
-                 selected_profile: str = None,
-                 origin_widget: bui.Widget = None):
-        super().__init__(transition, in_main_menu, selected_profile,
-                         origin_widget)
-
-        self.session = bs.get_foreground_host_session()
-        uiscale = bui.app.ui_v1.uiscale
-        width = (100 if uiscale is
-                        babase.UIScale.SMALL else -14)
-        size = 50
-        position = (width * 1.65, 300)
-
-        if isinstance(self.session, MainMenuSession):
-            self.button = bui.buttonwidget(parent=self._root_widget,
-                                           autoselect=True, position=position,
-                                           size=(size, size),
-                                           button_type='square',
-                                           label='',
-                                           on_activate_call=babase.CallStrict(
-                                               self.powerupmanager_window))
-
-            size = size * 0.60
-            self.image = bui.imagewidget(parent=self._root_widget,
-                                         size=(size, size),
-                                         draw_controller=self.button,
-                                         position=(
-                                         position[0] + 10.5, position[1] + 17),
-                                         texture=bs.gettexture('powerupSpeed'))
-
-            self.text = bui.textwidget(parent=self._root_widget,
-                                       position=(
-                                       position[0] + 25, position[1] + 10),
-                                       size=(0, 0), scale=0.45,
-                                       color=(0.7, 0.9, 0.7, 1.0),
-                                       draw_controller=self.button, maxwidth=60,
-                                       text=(f"Ultimate Powerup {_sp_}Manager"),
-                                       h_align='center', v_align='center')
-
-    def powerupmanager_window(self):
-        bui.containerwidget(edit=self._root_widget, transition='out_left')
-        PowerupManagerWindow()
-
-
 class NewPowerupBoxFactory(pupbox.PowerupBoxFactory):
     def __init__(self) -> None:
         super().__init__()
@@ -570,6 +565,22 @@ class NewPowerupBoxFactory(pupbox.PowerupBoxFactory):
         self.tex_fly_bombs = bs.gettexture('star')
         self.tex_bomb_cena = bs.gettexture('plusButton')
         self.tex_red_shield = bs.gettexture('crossOutMask')
+        self.tex_supplies = bs.gettexture('logoEaster')
+        self.tex_superhuman_healing = bs.gettexture('achievementStayinAlive')
+        self.tex_super_shield = bs.gettexture('ouyaOButton')
+        self.tex_T784_bomb = bs.gettexture('star')
+        self.tex_blackhole_bomb = bs.gettexture('replayIcon')
+        self.tex_Xfactor_bomb = bs.gettexture('textClearButton')
+        self.tex_smb_bomb = bs.gettexture('powerupCurse')
+
+        self.tex_nitrogen_bomb = bs.gettexture('powerupIceBombs')
+        self.tex_cosmic_bomb = bs.gettexture('achievementFootballShutout')
+        self.tex_electro_bombs = bs.gettexture('levelIcon')
+        self.tex_cosmic_box = bs.gettexture('achievementSuperPunch')
+        self.tex_stun_bomb = bs.gettexture('eggTex3')
+        self.tex_teleport_bomb = bs.gettexture('rightButton')
+        self.tex_gloo_wall_bomb = bs.gettexture('bombColorIce')
+        self.tex_attraction_bomb = bs.gettexture('backIcon')
 
         self._powerupdist = []
         for powerup, freq in powerup_dist():
@@ -681,7 +692,7 @@ def _bomb_init(self,
 
     if _bombcena:
         self.blast_radius *= 2.0
-        bs.animate(self.node, 'mesh_scale', {0: 0, 0.2: 1.3, 0.26: 1.0, 0.35: 2.5})
+        bs.animate(self.node, 'mesh_scale', {0: 0, 0.1: 2.5})
     _n = self.node
     bs.timer(0.3, lambda: bs.animate(_n, 'mesh_scale', {0: 2.0}) if _bombcena and _n and _n.exists() else None)
     bs.timer(0.3, lambda: bs.animate(_n, "mesh_scale", {0: 2.5}) if _bombcena and _n and _n.exists() else None)
@@ -790,7 +801,19 @@ def _pbx_(self, position: Sequence[float] = (0.0, 1.0, 0.0),
     tex = self.node.color_texture
     mesh = self.node.mesh
 
-    if self.npowerup == 'speed':
+    if self.npowerup == 'cosmic_bomb':
+        type = self.npowerup
+        tex = factory.tex_cosmic_bomb
+    elif self.npowerup == 'electro-bombs':
+        type = self.npowerup
+        tex = factory.tex_electro_bombs
+    elif self.npowerup == 'cosmic_box':
+        type = self.npowerup
+        tex = factory.tex_cosmic_box
+    elif self.npowerup == 's.m.b_bomb':
+        type = self.npowerup
+        tex = factory.tex_smb_bomb
+    elif self.npowerup == 'speed':
         type = self.npowerup
         tex = factory.tex_speed
     elif self.npowerup == 'health_damage':
@@ -817,6 +840,39 @@ def _pbx_(self, position: Sequence[float] = (0.0, 1.0, 0.0),
     elif self.npowerup == 'bomb_cena':
         type = self.npowerup
         tex = factory.tex_bomb_cena
+    elif self.npowerup == 'supplies':
+        type = self.npowerup
+        tex = factory.tex_supplies
+    elif self.npowerup == 'superhuman_healing':
+        type = self.npowerup
+        tex = factory.tex_superhuman_healing
+    elif self.npowerup == 'super_shield':
+        type = self.npowerup
+        tex = factory.tex_super_shield
+    elif self.npowerup == 'T784_bomb':
+        type = self.npowerup
+        tex = factory.tex_T784_bomb
+    elif self.npowerup == 'blackhole_bomb':
+        type = self.npowerup
+        tex = factory.tex_blackhole_bomb
+    elif self.npowerup == 'Xfactor_bomb':
+        type = self.npowerup
+        tex = factory.tex_Xfactor_bomb
+    elif self.npowerup == 'gloo_wall_bomb':
+        type = self.npowerup
+        tex = factory.tex_gloo_wall_bomb
+    elif self.npowerup == 'attraction_bomb':
+        type = self.npowerup
+        tex = factory.tex_attraction_bomb
+    elif self.npowerup == 'nitrogen_bomb':
+        type = self.npowerup
+        tex = factory.tex_nitrogen_bomb
+    elif self.npowerup == 'stun_bomb':
+        type = self.npowerup
+        tex = factory.tex_stun_bomb
+    elif self.npowerup == 'teleport_bomb':
+        type = self.npowerup
+        tex = factory.tex_teleport_bomb
     elif self.npowerup == 'red_shield':
         type = self.npowerup
         tex = factory.tex_red_shield
@@ -1212,7 +1268,7 @@ def new_handlemessage(self, msg: Any) -> Any:
             def _apply_red_color() -> None:
                 if _owner.shield and _owner.shield.exists():
                     _owner.shield.color = (5.0, 0.0, 0.0)
-            bs.timer(0.2, _apply_red_color)
+            bs.timer(0.01, _apply_red_color)
             def _watch_shield() -> None:
                 if not _owner.node or not _owner.node.exists():
                     return
@@ -1242,7 +1298,7 @@ def new_handlemessage(self, msg: Any) -> Any:
                             source_player=None))
                     return
                 bs.timer(0.1, _watch_shield)
-            bs.timer(0.3, _watch_shield)
+            bs.timer(0.05, _watch_shield)
 
         elif msg.poweruptype == 'fly_bombs':
             self.bomb_type = 'fly'
@@ -1341,6 +1397,11 @@ def new_handlemessage(self, msg: Any) -> Any:
                 self.speed_timer = (bs.apptimer(speed_time,
                                                 babase.CallPartial(_speed_wear_off,
                                                             self)))
+
+        # EX Powerups dispatch
+        ex_tags = ['s.m.b_bomb', 'supplies','superhuman_healing','super_shield','T784_bomb','blackhole_bomb','Xfactor_bomb','gloo_wall_bomb','nitrogen_bomb','stun_bomb','teleport_bomb','attraction_bomb','cosmic_bomb','electro-bombs','cosmic_box']
+        if msg.poweruptype in ex_tags:
+            self.ex_powerup_call(msg.poweruptype)
 
         self.bmb_color: list = []
         self.bmb_color.append(self.bomb_type)
@@ -2757,11 +2818,1397 @@ class PowerupManagerWindow(PopupWindow):
 
     def _back(self):
         bui.containerwidget(edit=self._root_widget, transition='out_left')
-        browser.ProfileBrowserWindow()
+        pass
 
+
+# ===== EX POWERUPS CLASSES =====
+
+class _TouchMessage:
+    pass
+class ExplodeMessage:
+    pass
+class ExplodeBombMessage:
+    pass
+
+class ExBlast(bomb.Blast):
+    def __init__(self, position=(0.0,1.0,0.0), velocity=(0.0,0.0,0.0), owner=None, **kwargs):
+        super().__init__(position=position, **kwargs)
+        self.owner = owner
+        self.position = position
+        self.velocity = velocity
+
+    def handlemessage(self, msg):
+        assert not self.expired
+        if isinstance(msg, bomb.ExplodeHitMessage):
+            node = bs.getcollision().opposingnode
+            cls_node = node.getdelegate(object)
+            pos = self.position
+            nodepos = self.node.position
+            mag = 2000.0
+            if self.blast_type == 'nitrogen':
+                mag = 672.0
+                if node.getnodetype() == 'spaz':
+                    if cls_node.shield:
+                        mag = 1300.0
+                    else:
+                        node.handlemessage(bs.FreezeMessage())
+            elif self.blast_type == 'stun':
+                if node.getnodetype() == 'spaz':
+                    node.handlemessage('knockout', 3500.0)
+                    mag = 400.0
+                else:
+                    mag = 400.0
+            elif self.blast_type == 's.m.b':
+                if node.getnodetype() == 'spaz':
+                    p = nodepos
+                    n = node.position
+                    dx = n[0]-p[0]; dy = n[1]-p[1]; dz = n[2]-p[2]
+                    dist = max(0.01,(dx**2+dy**2+dz**2)**0.5)
+                    fx = dx/dist*6000.0
+                    fy = dy/dist*6000.0+1200.0
+                    fz = dz/dist*6000.0
+                    node.handlemessage('impulse',p[0],p[1],p[2],
+                        fx,fy,fz,6000,6000,0,0,fx,fy,fz)
+                return
+            elif self.blast_type == 'curative':
+                if node.getnodetype() == 'spaz':
+                    ex_health(cls_node, 100)
+                return
+            elif self.blast_type == 'teleport':
+                if node.getnodetype() == 'spaz':
+                    owner_cls = (self.owner.getdelegate(object)
+                                 if self.owner else None)
+                    if owner_cls and owner_cls.node == node:
+                        import random as _r
+                        p = node.position
+                        node.handlemessage(bs.StandMessage(
+                            position=(p[0]+_r.uniform(-3,3),
+                                      p[1]+1,
+                                      p[2]+_r.uniform(-3,3))))
+                        ex_health(owner_cls, 150)
+                return
+            elif self.blast_type == 'cosmic':
+                owner_cls = (self.owner.getdelegate(object)
+                             if self.owner else None)
+                if owner_cls and not getattr(owner_cls,'cosmic_power',False):
+                    owner_cls.cosmic_power = True
+                    c = list(owner_cls.node.color)
+                    c[1] = min(c[1]+1.5, 3.0)
+                    owner_cls.node.color = tuple(c)
+                    bs.timer(15.0, bs.Call(_ex_cosmic_wear_off, owner_cls))
+                return
+            elif self.blast_type == 'electro':
+                team = ex_get_team(self._source_player)
+                if self.owner == node:
+                    return
+                if node in team:
+                    return
+                ex_electricity(node, self.owner)
+            elif self.blast_type == 'blackhole':
+                if node.getnodetype() == 'spaz':
+                    if self.owner != node:
+                        p = nodepos
+                        n = node.position
+                        dx = p[0]-n[0]; dy = p[1]-n[1]; dz = p[2]-n[2]
+                        dist = max(0.01,(dx**2+dy**2+dz**2)**0.5)
+                        fx = dx/dist*5000.0
+                        fy = dy/dist*5000.0
+                        fz = dz/dist*5000.0
+                        node.handlemessage('impulse',n[0],n[1],n[2],
+                            fx,fy,fz,5000,5000,0,0,fx,fy,fz)
+                        node.handlemessage('knockout', 4000.0)
+                return
+            elif self.blast_type == 'attraction':
+                if node.getnodetype() == 'spaz':
+                    p = self.position
+                    n = node.position
+                    dx = p[0]-n[0]; dy = p[1]-n[1]+2; dz = p[2]-n[2]
+                    dist = max(0.01,(dx**2+dy**2+dz**2)**0.5)
+                    fx = dx/dist*800.0
+                    fy = min(dy/dist*800.0, 300.0)
+                    fz = dz/dist*800.0
+                    node.handlemessage('impulse',n[0],n[1],n[2],
+                        fx,fy,fz,800,800,0,0,fx,fy,fz)
+                    node.handlemessage('knockout', 1500.0)
+                return
+            elif self.blast_type == 'super_shield':
+                team = ex_get_team(self._source_player)
+                if self.owner == node:
+                    return
+                if node in team:
+                    return
+                return ex_impulse(node,
+                    bs.HitMessage(pos=self.position,
+                                  velocity=self.velocity,
+                                  magnitude=1200,
+                                  hit_subtype='stun',
+                                  radius=800))
+            if self.blast_type == 'gloo':
+                if not getattr(self, '_gloo_spawned', False):
+                    self._gloo_spawned = True
+                    p = nodepos
+                    shared = SharedObjects.get()
+                    wall_mat = bs.Material()
+                    wall_mat.add_actions(
+                        conditions=('they_have_material', shared.object_material),
+                        actions=(('modify_part_collision','collide',True),
+                                 ('modify_part_collision','physical',True)))
+                    for i in range(5):
+                        wall = bs.newnode('prop',
+                            attrs={'position':(p[0]+i*0.6-1.2, p[1]+0.5, p[2]),
+                                   'body':'box',
+                                   'mesh': bs.getmesh('tray'),
+                                   'color_texture': bs.gettexture('bombColorIce'),
+                                   'reflection':'soft',
+                                   'reflection_scale':[1.0],
+                                   'shadow_size':0.3,
+                                   'mesh_scale':0.8,
+                                   'density':99999.0,
+                                   'materials':[shared.object_material, wall_mat]})
+                        bs.timer(ex.duration_gw, wall.delete)
+                return
+            node.handlemessage(
+                bs.HitMessage(pos=nodepos, velocity=(0,0,0),
+                              magnitude=mag, hit_type=self.hit_type,
+                              hit_subtype=self.hit_subtype,
+                              radius=self.radius,
+                              source_player=bs.existing(self._source_player)))
+        else:
+            return super().handlemessage(msg)
+
+
+class Tr784(bs.Actor):
+    def __init__(self, owner=None, position=(0.0,1.0,0.0)):
+        super().__init__()
+        self.owner = owner
+        self.touch = 0
+        self.hitpoints = int(ex_cosmic(owner, ex.hitpoints_t784))
+        self.last_ball = None
+        self._player = owner.source_player
+        self.scale = scale = 0.75
+        self.team = []
+        self.nodes = []
+        if self._player is not None:
+            self.team = self._player.team.players
+        mat3 = ex_materials()[4]
+        shared = SharedObjects.get()
+        mesh = bs.getmesh('powerup')
+        tex = bs.gettexture('ouyaOButton')
+        self.node = bs.newnode('prop',
+            delegate=self,
+            attrs={'body': 'crate', 'body_scale': scale,
+                   'position': position, 'mesh': mesh,
+                   'shadow_size': 0.5, 'density': 9.0,
+                   'color_texture': tex, 'reflection': 'soft',
+                   'reflection_scale': [1.4],
+                   'materials': (mat3, shared.footing_material,
+                                 shared.object_material)})
+        bs.animate(self.node, 'mesh_scale', {0:0, 0.14:scale*1.6, 0.20:scale})
+        self.owner.add_death_action(
+            bs.WeakCall(self.handlemessage, bs.DieMessage()))
+        scale2 = ex_cosmic(owner, ex.size_t784)
+        self.loc_color = (0,1,6)
+        self.loc = bs.newnode('locator',
+            owner=self.node,
+            attrs={'shape':'circleOutline', 'color': self.loc_color,
+                   'opacity': 0.3, 'size': [scale2],
+                   'draw_beauty': False, 'additive': False})
+        self.node.connectattr('position', self.loc, 'position')
+        self.region = None
+        self.region_scale(x=True)
+        self.hp = ExText(text=str(self.hitpoints), node=self.node,
+                          position=(0.0,0.45,0.0))
+        ex_fake_explosion(radius=1.9, position=self.node.position)
+
+    def region_scale(self, x=False, e=False):
+        if not self.node:
+            return
+        if x:
+            scale = ex_cosmic(self.owner, ex.size_t784)
+            mat1 = ex_materials_cb(self.call)
+            self.region = bs.newnode('region',
+                owner=self.node,
+                attrs={'type':'sphere', 'materials':[mat1]})
+            self.node.connectattr('position', self.region, 'position')
+            t = ex.cooldown_t784
+            bs.animate_array(self.region, 'scale', 3,
+                {0.00: tuple(scale*0.0 for s in range(3)),
+                 t-0.01: tuple(scale*0.0 for s in range(3)),
+                 t: tuple(scale*0.5 for s in range(3)),
+                 t+0.01: tuple(scale*0.5 for s in range(3))}, loop=x)
+        else:
+            if self.region:
+                self.region.delete()
+                self.region = None
+
+    def call(self):
+        node = bs.getcollision().opposingnode
+        if len(self.nodes) == 0:
+            bs.timer(0.01, self.shoot)
+        if self.owner != node:
+            if node in ex_get_team(self._player):
+                return
+        if node not in self.nodes:
+            self.nodes.append(node)
+            try:
+                cls_node = node.getdelegate(object)
+                if cls_node._dead:
+                    self.nodes.remove(node)
+            except: 
+                self.nodes.remove(node)
+
+    def shoot(self):
+        if not any(self.nodes):
+            return
+        if len(self.nodes) >= 2:
+            if self.owner in self.nodes:
+                self.nodes.remove(self.owner)
+        node = self.nodes[0]
+        self.nodes.clear()
+        if self.last_ball is not None:
+            if not self.last_ball.node:
+                self.last_ball = None
+            else:
+                return
+        for player in self.team:
+            if self.owner != node:
+                if player.actor and player.actor.node == node:
+                    return
+        try:
+            scale_radius = ex_cosmic(self.owner, ex.size_t784) * 0.5
+            ball = T784Ball(owner=self.owner, enemy=node,
+                position=self.node.position,
+                turret_pos=self.node.position,
+                turret_radius=scale_radius).autoretain()
+            self.last_ball = ball
+            node_vel = ex_getnodepos([node, ball.node], x=6.6)
+            ball.node.velocity = node_vel
+            self.region_scale(x=False)
+            ball.node.add_death_action(
+                bs.Call(self.region_scale, x=True, e=self.owner != node))
+            color = self.loc_color
+            bs.animate_array(self.loc, 'color', 3,
+                {0: color, 0.1: (1,0,0), 0.2: color})
+            bs.getsound('corkPop').play()
+        except Exception:
+            pass
+
+    def dead(self):
+        pos = self.node.position
+        ex_fake_explosion(color=(2.0,0.1,0.1), radius=1.2, sound=True, position=pos)
+
+    def handlemessage(self, msg):
+        if isinstance(msg, bs.DieMessage):
+            if self.node:
+                self.dead()
+                if self.region:
+                    self.region.delete()
+                self.node.delete()
+        elif isinstance(msg, bs.HitMessage):
+            ex_hitmessage(msg, delegate=self, reduction=0)
+            if self.hp.node:
+                self.hp.node.text = str(self.hitpoints)
+        else:
+            super().handlemessage(msg)
+
+
+class T784Ball(bs.Actor):
+    def __init__(self, owner=None, enemy=None, position=(0.0,1.0,0.0), turret_pos=None, turret_radius=6.0):
+        super().__init__()
+        self.owner = owner
+        self.enemy = enemy
+        self.scale = scale = 0.15
+        self.touch = 0
+        self.turret_pos = turret_pos if turret_pos else position
+        self.turret_radius = turret_radius
+        self.out_of_range = False
+        self._dead = False
+        shared = SharedObjects.get()
+        mesh = bs.getmesh('shield')
+        tex = bs.gettexture('eggTex2')
+        mat1 = ex_materials_cb(self.call)
+        mat2 = ex_materials()[4]
+        position = (position[0], position[1]+0.5, position[2])
+        self.node = bs.newnode('prop',
+            owner=enemy, delegate=self,
+            attrs={'body':'sphere', 'mesh_scale': scale, 'body_scale': 0.35,
+                   'position': position, 'mesh': mesh, 'shadow_size': 0.5,
+                   'color_texture': tex, 'reflection': 'soft',
+                   'reflection_scale': [1.4],
+                   'materials': (mat1, mat2, shared.object_material)})
+        bs.timer(5.0, bs.WeakCall(self.handlemessage, bs.DieMessage()))
+        bs.timer(0.05, bs.WeakCall(self._home))
+
+    def _home(self):
+        if not self.node or self._dead:
+            return
+        if not self.enemy or self.out_of_range:
+            return
+        p = self.node.position
+        tp = self.turret_pos
+        dist_to_turret = ((p[0]-tp[0])**2 + (p[1]-tp[1])**2 + (p[2]-tp[2])**2) ** 0.5
+        if dist_to_turret > self.turret_radius:
+            self.out_of_range = True
+            bs.timer(1.0, bs.WeakCall(self.handlemessage, bs.DieMessage()))
+            return
+        ep = self.enemy.position
+        dx = ep[0]-p[0]; dy = (ep[1]+0.5)-p[1]; dz = ep[2]-p[2]
+        d = max(0.01, (dx**2+dy**2+dz**2)**0.5)
+        speed = 5.5
+        self.node.velocity = (dx/d*speed, dy/d*speed, dz/d*speed)
+        bs.timer(0.05, bs.WeakCall(self._home))
+
+    def call(self):
+        if self.touch != 0:
+            self.touch = 0
+            return
+        self.touch += 1
+        node = bs.getcollision().opposingnode
+        cls_node = node.getdelegate(object)
+        if getattr(cls_node, '_dead', None):
+            return
+        if self.owner == node:
+            ex_health(cls_node, ex.max_cure_t784)
+        else:
+            if not getattr(node, 'invincible', False):
+                mag = ex.damage_t784
+                msg = bs.HitMessage(srcnode=self.owner, velocity=(0,0,0),
+                                     flat_damage=mag, hit_subtype='T784')
+                node.handlemessage(msg)
+                PopupText(text='-'+str(msg.flat_damage)+'HP',
+                    color=(0.8,0.1,0.1), scale=1.0,
+                    random_offset=0.0, position=node.position).autoretain()
+        self.handlemessage(bs.DieMessage())
+
+    def handlemessage(self, msg):
+        if isinstance(msg, bs.DieMessage):
+            self._dead = True
+            if self.node:
+                self.node.delete()
+        else:
+            super().handlemessage(msg)
+
+
+class ExPortal(bs.Actor):
+    def __init__(self, owner=None, bomb_node=None, position=(0.0,1.0,0.0)):
+        super().__init__()
+        self.scale = scale = 6.0
+        self.owner_node = owner
+        self.bomb_node = bomb_node
+        self._dead = False
+        mat = ex_materials_cb(self.call)
+        self.node = bs.newnode('region',
+            delegate=self,
+            attrs={'scale': [scale*0.6 for s in range(3)],
+                   'type': 'sphere', 'position': position,
+                   'materials': [mat]})
+        if bomb_node is not None:
+            bomb_node.connectattr('position', self.node, 'position')
+        self.shield = bs.newnode('shield', owner=self.node,
+            attrs={'radius': scale, 'color': (0.5,0.5,0.5), 'hurt': -1.5})
+        self.node.connectattr('position', self.shield, 'position')
+        bs.timer(0.5, bs.WeakCall(self.effect))
+
+    def effect(self):
+        if self._dead or not self.shield:
+            return
+        s = self.scale
+        bs.animate(self.shield, 'radius', {0: s, 1.0: 0})
+        bs.timer(1.0, bs.WeakCall(self._finish))
+
+    def _finish(self):
+        if self._dead:
+            return
+        if self.bomb_node:
+            pos = self.bomb_node.position
+            ExBlast(owner=self.owner_node, blast_radius=4.0,
+                    blast_type='blackhole', position=pos,
+                    velocity=(0.0,0.0,0.0),
+                    source_player=getattr(self.owner_node, 'source_player', None)
+                    ).autoretain()
+            ex_fake_explosion(position=pos, color=(0.3,0.0,0.5), radius=2.5)
+            bs.getsound('shieldDown').play()
+            self._spawn_sombrita()
+        self.handlemessage(bs.DieMessage())
+
+    def _spawn_sombrita(self):
+        owner_cls = self.owner_node.getdelegate(object) if self.owner_node else None
+        if owner_cls is None:
+            return
+        pos = self.bomb_node.position
+        owner_cls._ex_bots = ExBotSet()
+        owner_cls._ex_bots.owner = self.owner_node
+        owner_cls._ex_bots.spawn_bot(
+            bot_type=bs.Call(SombritaBot, source_player=self.owner_node.source_player),
+            pos=pos, spawn_time=1.0, on_spawn_call=None)
+        self.owner_node.add_death_action(
+            bs.Call(setattr, owner_cls, '_ex_bots', None))
+
+    def call(self):
+        node = bs.getcollision().opposingnode
+        cls_node = node.getdelegate(object)
+        if self.owner_node == node:
+            return
+        if node in ex_get_team(self.owner_node.source_player):
+            return
+        if self.bomb_node:
+            cls_node._pick_up(self.bomb_node)
+            node.handlemessage('knockout', 5000.0)
+
+    def handlemessage(self, msg):
+        if isinstance(msg, bs.DieMessage):
+            self._dead = True
+            if self.bomb_node:
+                self.bomb_node.delete()
+                self.bomb_node = None
+            if self.shield:
+                self.shield.delete()
+                self.shield = None
+            if self.node:
+                self.node.delete()
+                self.node = None
+        else:
+            super().handlemessage(msg)
+
+
+class SombritaBot(bots.BrawlerBot):
+    run = True
+    default_boxing_gloves = False
+    character = 'Taobao Mascot'
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+        self.hitpoints = self.hitpoints_max = ex.sombrita_hp
+        self.node.color, self.node.highlight = [(0.0, 0.0, 0.0)] * 2
+        self.node.color_texture, self.node.color_mask_texture = [bs.gettexture('black')] * 2
+        self._punch_power_scale = 2.0
+
+    def handlemessage(self, msg):
+        if isinstance(msg, bs.DieMessage):
+            if self.node:
+                if msg.immediate:
+                    ex_fake_explosion(self.node.position, sound=False,
+                        color=tuple(max(round(random.random()*2,1),0.5) for s in range(3)))
+                return Spaz.handlemessage(self, msg)
+        else:
+            if isinstance(msg, PunchHitMessage):
+                try:
+                    node = bs.getcollision().opposingnode
+                    if node.getnodetype() == 'spaz':
+                        self._pick_up(node)
+                except Exception:
+                    pass
+            return super().handlemessage(msg)
+
+
+class ExBotSet(bots.SpazBotSet):
+    owner = None
+
+
+class MiniZone:
+    def __init__(self, type='freeze', duration=5.0, radius=1.5, owner=None,
+                 color=(0,1.5,1.5), position=(0.0,1.0,0.0)):
+        scale = radius
+        self.type = type
+        self.owner = owner
+        self.hypothermic_material = ex_materials_cb(self.call)
+        self.show_zone = bs.newnode('shield',
+            owner=self.owner,
+            attrs={'position': position, 'color': color, 'radius': scale})
+        self.region = bs.newnode('region',
+            owner=self.show_zone,
+            attrs={'position': position,
+                   'scale': [scale*0.6 for s in range(3)],
+                   'type': 'sphere',
+                   'materials': [self.hypothermic_material]})
+        self.show_zone.connectattr('position', self.region, 'position')
+        bs.timer(duration, self.end)
+
+    def end(self):
+        if self.show_zone:
+            r = self.show_zone.radius
+            bs.animate(self.show_zone, 'radius', {0: r, 0.1: 0})
+            bs.timer(0.1, self.show_zone.delete)
+
+    def call(self):
+        node = bs.getcollision().opposingnode
+        cls_node = node.getdelegate(object)
+        if self.type == 'freeze':
+            node.handlemessage(bs.FreezeMessage())
+        elif self.type == 'stun':
+            if isinstance(cls_node, Spaz):
+                ex_impulse(node,
+                    bs.HitMessage(pos=self.show_zone.position,
+                                  velocity=(0,0,0),
+                                  magnitude=260,
+                                  hit_subtype='stun',
+                                  radius=560))
+                bs.timer(0.0, lambda: node.handlemessage('knockout', 2000.0))
+                bs.timer(1.5, lambda: node.handlemessage('knockout', 2000.0))
+                ex_fake_explosion(color=(1.0,1.0,2.0), radius=0.8, sound=False,
+                                  position=node.position)
+                bs.getsound('shieldHit').play()
+
+
+
+class Smb(bs.Actor):
+    def __init__(self, angle=0, owner=None, position=(0.0, 1.0, 0.0)):
+        super().__init__()
+        self.owner = owner
+        self.scale = scale = 0.7
+        mat1 = ex_materials_cb(self.call)
+        shared = SharedObjects.get()
+        mesh = bs.getmesh('shield')
+        texs = ['aliColorMask', 'aliColor', 'eggTex3', 'eggTex2']
+        tex = bs.gettexture(texs[angle])
+        self.node = bs.newnode('prop',
+            delegate=self,
+            attrs={'body': 'sphere',
+                   'body_scale': 4,
+                   'position': position,
+                   'mesh': mesh,
+                   'shadow_size': 0.5,
+                   'color_texture': tex,
+                   'reflection': 'soft',
+                   'reflection_scale': [1.3],
+                   'materials': [mat1, shared.object_material]})
+        bs.animate(self.node, 'mesh_scale',
+            {0: 0, 0.14: scale * 1.6, 0.20: scale})
+        self.direction(angle)
+
+    def call(self):
+        if not self.node:
+            return
+        node = bs.getcollision().opposingnode
+        if self.owner == node:
+            return
+        pos = [x * 50 for x in self.node.position]
+        pos[1] = -50
+        vel = getattr(self.node, 'velocity', (0.0, 0.0, 0.0))
+        if hasattr(node, 'hold_node'):
+            node.hold_node = None
+
+        def impulse():
+            if self.node and node:
+                ex_impulse(node,
+                    bs.HitMessage(pos=pos,
+                                  velocity=vel,
+                                  magnitude=500 * 4,
+                                  hit_subtype='s.m.b',
+                                  radius=7840))
+
+        def blast(ix=None, imp=0.5):
+            if node:
+                p = node.position
+                x = 0.5
+                if ix == 0:
+                    bpos = (p[0], p[1] + x, p[2])
+                elif ix == 1:
+                    bpos = (p[0], p[1] - x, p[2])
+                else:
+                    bpos = (p[0], p[1] - 0.3, p[2])
+                ExBlast(owner=self.owner,
+                        blast_radius=imp, blast_type='super_shield',
+                        position=bpos, velocity=node.velocity,
+                        source_player=getattr(self.owner, 'source_player', None))
+
+        blast()
+        impulse()
+        bs.timer(0.2, impulse)
+        for n1, n2 in enumerate([0.8, 1.5]):
+            bs.timer(n2, bs.Call(blast, n1, n2))
+
+    def direction(self, angle):
+        reduction = 44.44
+        mypos = self.node.position
+        dis = ex_calculate(18.0, 100 - reduction)
+        duration = ex_calculate(1.3, 100 - reduction)
+        myangle = [(mypos[0] + dis, mypos[1], mypos[2]),
+                   (mypos[0] - dis, mypos[1], mypos[2]),
+                   (mypos[0], mypos[1], mypos[2] + dis),
+                   (mypos[0], mypos[1], mypos[2] - dis)][min(angle, 3)]
+        bs.animate_array(self.node, 'position', 3,
+            {0: mypos, duration: myangle})
+        bs.timer(duration, bs.Call(self.handlemessage, bs.DieMessage()))
+
+    def handlemessage(self, msg):
+        if isinstance(msg, bs.DieMessage):
+            if self.node:
+                self.node.delete()
+        else:
+            super().handlemessage(msg)
+
+class GlooWall(bs.Actor):
+    def __init__(self, owner=None, position=(0.0,0.7,0.0)):
+        super().__init__()
+        self.owner = owner
+        self.scale = scale = 2.550
+        mat1 = ex_materials_cb(self.call)
+        shared = SharedObjects.get()
+        mesh = bs.getmesh('box')
+        tex = bs.gettexture('bombColorIce')
+        position = (position[0], position[1] + 1.0, position[2])
+        self.node = bs.newnode('prop',
+            delegate=self,
+            attrs={'body': 'crate', 'body_scale': scale,
+                   'position': position, 'mesh': mesh,
+                   'density': 1.0, 'shadow_size': 0.0,
+                   'color_texture': tex, 'reflection': 'soft',
+                   'sticky': True, 'reflection_scale': [2.6],
+                   'materials': [mat1, shared.footing_material]})
+        bs.animate(self.node, 'mesh_scale',
+            {0: 0, 0.14: scale * 1.6, 0.20: scale - 1.0})
+        bs.timer(ex.duration_gw, bs.Call(self.handlemessage, bs.DieMessage()))
+
+    def call(self):
+        node = bs.getcollision().opposingnode
+        cls_node = node.getdelegate(object)
+        cls_node._pick_up(self.node)
+
+    def _dead(self):
+        ex_fake_explosion(color=(0.0,0.0,2.0), radius=1.9, position=self.node.position)
+        bs.emitfx(position=self.node.position, velocity=(0.0,12.0,0.0),
+                  count=50, spread=2.0, scale=1.7, chunk_type='ice')
+        try:
+            MiniZone(owner=None, position=self.node.position)
+        except Exception as e:
+            print(e)
+
+    def handlemessage(self, msg):
+        if isinstance(msg, bs.DieMessage):
+            if self.node:
+                self._dead()
+                self.node.delete()
+        else:
+            super().handlemessage(msg)
+
+
+def _ex_cosmic_wear_off(owner_cls):
+    if not owner_cls or not owner_cls.node:
+        return
+    owner_cls.cosmic_power = False
+    c = list(owner_cls.node.color)
+    if len(c) >= 2:
+        c[1] = max(0.0, c[1] - 1.5)
+        owner_cls.node.color = tuple(c)
+
+
+class ExBomb(bomb.Bomb):
+    def __init__(self, bomb_type='normal', **kwargs):
+        self.ex_bomb_type = bomb_type
+        self.type = {
+            'Xfactor': 'impact', 's.m.b': 'impact', 'T784': 'impact',
+            'gloo': 'impact', 'teleport': 'impact', 'cosmic': 'impact',
+            'blackhole': 'impact', 'curative': 'impact', 'attraction': 'land_mine',
+        }.get(bomb_type, 'normal')
+        super().__init__(bomb_type=self.type, **kwargs)
+        tex = self.node.color_texture
+        mod = self.node.mesh
+        scale = None
+        self.xp_sound = None
+        if bomb_type == 'nitrogen':
+            tex = bs.gettexture('powerupIceBombs')
+            self.node.reflection = 'soft'
+            self.node.reflection_scale = [1.3]
+            self.xp_sound = 'hiss'
+        elif bomb_type == 's.m.b':
+            tex = bs.gettexture('powerupIceBombs')
+            mod = bs.getmesh('shield')
+            self.node.reflection = 'soft'
+            self.node.reflection_scale = [2.6]
+            scale = 0.25
+        elif bomb_type == 'Xfactor':
+            tex = bs.gettexture('eggTex1')
+            mod = bs.getmesh('egg')
+            self.node.reflection = 'soft'
+            self.node.reflection_scale = [0.23]
+            bs.timer(0.001, bs.WeakCall(self._add_xfactor_materials))
+            scale = 0.5
+        elif bomb_type == 'T784':
+            tex = bs.gettexture('ouyaOButton')
+            mod = bs.getmesh('shield')
+            self.node.reflection = 'soft'
+            self.node.reflection_scale = [1.4]
+            self.blast_radius = 0.0
+            scale = 0.25
+        elif bomb_type == 'stun':
+            tex = bs.gettexture('eggTex3')
+            self.node.reflection = 'soft'
+            self.node.reflection_scale = [1.8]
+        elif bomb_type == 'teleport':
+            tex = bs.gettexture('rightButton')
+            self.node.reflection = 'soft'
+            self.node.reflection_scale = [1.3]
+        elif bomb_type == 'gloo':
+            tex = bs.gettexture('bombColorIce')
+            mod = bs.getmesh('shield')
+            scale = 0.3
+        elif bomb_type == 'cosmic':
+            tex = bs.gettexture('achievementFootballShutout')
+        elif bomb_type == 'electro':
+            tex = bs.gettexture('levelIcon')
+        elif bomb_type == 'blackhole':
+            tex = bs.gettexture('rgbStripes')
+            self.node.reflection = 'soft'
+            self.node.reflection_scale = [0.0]
+            self.blast_radius *= 3.0
+            scale = 0.9
+        elif bomb_type == 'attraction':
+            tex = bs.gettexture('backIcon')
+        self.node.color_texture = tex
+        self.node.mesh = mod
+        if scale is not None:
+            self.node.mesh_scale = scale
+
+    def explode(self):
+        if self._exploded:
+            return
+        self._exploded = True
+        if self.ex_bomb_type == 'T784':
+            if self.node:
+                Tr784(owner=self.owner, position=self.node.position).autoretain()
+            bs.timer(0.001, bs.WeakCallStrict(self.handlemessage, bs.DieMessage()))
+            return
+        if self.ex_bomb_type == 'blackhole':
+            if self.node and not getattr(self, '_portal_spawned', False):
+                self._portal_spawned = True
+                self.node.sticky = True
+                ExPortal(owner=self.owner, bomb_node=self.node,
+                         position=self.node.position).autoretain()
+            return
+        if self.node:
+            blast = ExBlast(
+                position=self.node.position,
+                velocity=self.node.velocity,
+                blast_radius=self.blast_radius,
+                blast_type=self.ex_bomb_type,
+                source_player=bs.existing(self._source_player),
+                hit_type=self.hit_type,
+                hit_subtype=self.hit_subtype,
+                owner=self.node,
+            ).autoretain()
+            for callback in self._explode_callbacks:
+                callback(self, blast)
+        if self.ex_bomb_type == 'nitrogen' and self.node:
+            MiniZone(owner=self.owner, position=self.node.position)
+        bs.timer(0.001, bs.WeakCallStrict(self.handlemessage, bs.DieMessage()))
+
+    def arm(self):
+        if self.ex_bomb_type == 'Xfactor':
+            return
+        tex = self.node.color_texture if self.node else None
+        super().arm()
+        if self.node and tex:
+            self.node.color_texture = tex
+        if self.ex_bomb_type == 'attraction':
+            mat = ex_materials_cb(self._attraction_trigger)
+            self._attr_mat = mat
+            self.node.materials += (mat,)
+
+    def _attraction_trigger(self):
+        if not getattr(self, '_exploded', False):
+            self.explode()
+    def _add_xfactor_materials(self):
+        if self.node:
+            mats = ex_materials()
+            self._xf_mat1 = mats[2]
+            self._xf_mat2 = mats[3]
+            self.node.materials += (self._xf_mat1, self._xf_mat2,)
+
+    def handlemessage(self, msg):
+        if isinstance(msg, _TouchMessage):
+            if self.ex_bomb_type == 'Xfactor' and not getattr(self, '_xf_active', False):
+                self._xf_active = True
+                mat = ex_materials_cb(self._xfactor_chase)
+                self.region = bs.newnode('region',
+                    owner=self.node,
+                    attrs={'scale': [60.0 for s in range(3)],
+                           'type': 'sphere',
+                           'materials': [mat]})
+                self.node.connectattr('position', self.region, 'position')
+                v = self.node.velocity
+                self.node.velocity = (v[0], v[1]+12, v[2])
+            return
+        elif isinstance(msg, ExplodeBombMessage):
+            self.explode()
+        elif isinstance(msg, ExplodeMessage):
+            if self.ex_bomb_type == 'Xfactor':
+                node = bs.getcollision().opposingnode
+                if self.owner != node:
+                    self.explode()
+            else:
+                self.explode()
+        elif isinstance(msg, bomb.ExplodeMessage):
+            if self.ex_bomb_type == 'Xfactor':
+                return
+            elif self.ex_bomb_type == 's.m.b':
+                smb_eff(owner=self.owner, position=self.node.position)
+            elif self.ex_bomb_type == 'cosmic':
+                owner_cls = (self.owner.getdelegate(object)
+                             if self.owner else None)
+                if owner_cls and not getattr(owner_cls, 'cosmic_power', False):
+                    owner_cls.cosmic_power = True
+                    c = list(owner_cls.node.color)
+                    c[1] = min(c[1] + 1.5, 3.0)
+                    owner_cls.node.color = tuple(c)
+                    bs.timer(15.0, bs.Call(_ex_cosmic_wear_off, owner_cls))
+            elif self.ex_bomb_type == 'electro':
+                owner = self.owner
+                for node in bs.getnodes():
+                    if node.getnodetype() != 'spaz':
+                        continue
+                    if node == owner:
+                        continue
+                    p1 = self.node.position
+                    p2 = node.position
+                    dx = p1[0]-p2[0]; dy = p1[1]-p2[1]; dz = p1[2]-p2[2]
+                    dist = (dx**2 + dy**2 + dz**2) ** 0.5
+                    if dist < 6.0:
+                        cls_node = node.getdelegate(object)
+                        if cls_node and not getattr(cls_node, '_eb_eff', False):
+                            cls_node._eb_eff = True
+                            def zap(n=node, c=cls_node):
+                                for i in range(5):
+                                    def hit(nn=n, cc=c, ii=i):
+                                        if not nn:
+                                            return
+                                        nn.handlemessage(bs.HitMessage(
+                                            srcnode=owner,
+                                            velocity=(0,0,0),
+                                            flat_damage=30,
+                                            hit_subtype='electro'))
+                                        nn.handlemessage('knockout', 80.0)
+                                        if ii == 4:
+                                            cc._eb_eff = False
+                                    bs.timer(0.3 * i, hit)
+                            zap()
+            elif self.ex_bomb_type == 'gloo':
+                GlooWall(owner=self.owner, position=self.node.position).autoretain()
+                return self.handlemessage(bs.DieMessage())
+            elif self.ex_bomb_type == 'teleport':
+                if self.owner is not None:
+                    self.owner.handlemessage(
+                        bs.StandMessage(position=self.node.position))
+                    self.owner.handlemessage(
+                        bs.PowerupMessage(poweruptype='health'))
+                ex_fake_explosion(
+                    position=self.node.position,
+                    color=(1.2, 0.23, 0.23),
+                    sound=False, radius=1.8)
+                bs.getsound('spawn').play(0.3)
+                return self.handlemessage(bs.DieMessage())
+            elif self.ex_bomb_type == 'stun':
+                MiniZone(owner=self.owner, type='stun',
+                         duration=8.0, color=(2.0, 0.0, 2.0),
+                         radius=2.0, position=self.node.position)
+            self.explode()
+        elif isinstance(msg, bs.HitMessage):
+            if self.ex_bomb_type == 'Xfactor':
+                return
+            super().handlemessage(msg)
+        else:
+            super().handlemessage(msg)
+
+    def _xfactor_chase(self):
+        if not self.node:
+            return
+        node = bs.getcollision().opposingnode
+        cls_node = node.getdelegate(object)
+        team = ex_get_team(getattr(self, '_source_player', None))
+        if self.owner != node:
+            if node in team:
+                return
+        if self.owner == node or getattr(cls_node, '_dead', None):
+            return
+        x = 5.0
+        node_vel = ex_getnodepos([node, self.node], x=x)
+        dis = ex_getnodedis([self.node, node])
+        if dis[0] <= 3.0:
+            cls_node._pick_up(self.node)
+            node.handlemessage('knockout', 2000.0)
+            if cls_node.shield:
+                if not getattr(cls_node, 'ex_super_shield_active', None):
+                    cls_node.shield.delete()
+                    cls_node.shield = None
+                    bs.getsound('shieldDown').play()
+        vel = (
+            node_vel[0] * 1.0 if dis[0] < 6 else node_vel[0] * 0.5,
+            2.5,
+            node_vel[2] * 1.0 if dis[0] < 6 else node_vel[2] * 0.2)
+        self.node.velocity = vel
+
+
+# ===== EX helper functions =====
+
+def ex_cosmic(node, value):
+    cls_node = node.getdelegate(object)
+    if getattr(cls_node, '_eb_eff', False):
+        return value
+    m = bs.HitMessage(srcnode=node)
+    return value * m.magnitude
+
+def ex_hitmessage(msg, delegate=None, reduction=0, die=True):
+    mag = msg.magnitude * 1.0
+    velocity_mag = msg.velocity_magnitude
+    if not hasattr(delegate, 'hitpoints_max'):
+        delegate.hitpoints_max = delegate.hitpoints
+    if not msg.flat_damage:
+        if bool(reduction):
+            damage = round(ex_calculate(mag + velocity_mag, reduction), 2)
+        else:
+            damage = round(mag + velocity_mag, 2)
+    else:
+        damage = round(msg.flat_damage, 2)
+    if msg.hit_type == 'explosion':
+        damage = min(ex_calculate(damage, 40), ex.hitpoints_t784 * 0.5)
+    elif msg.hit_type == 'punch':
+        damage = min(damage, 1000)
+    damage = int(damage)
+    delegate.hitpoints = max(delegate.hitpoints - damage, 0)
+    if damage != 0:
+        dmg = f'-{int(ex_petage(damage, delegate.hitpoints_max, 0))}%'
+        bs.show_damage_count(dmg, delegate.node.position, msg.force_direction)
+    if die:
+        if delegate.hitpoints == 0:
+            delegate.node.handlemessage(bs.DieMessage())
+
+class ExText:
+    def __init__(self, text='', node=None, position=(0.0,0.5,0.0)):
+        self.node = bs.newnode('text',
+            owner=node,
+            attrs={'text': text, 'in_world': True,
+                   'shadow': 1.0, 'flatness': 1.0,
+                   'h_align': 'center', 'v_align': 'center',
+                   'scale': 0.01, 'position': position})
+        if node:
+            node.connectattr('position', self.node, 'position')
+
+def ex_get_team(player):
+    try:
+        if player is not None:
+            team = []
+            players = getattr(player.team, 'players', [])
+            for p in players:
+                team.append(p.actor.node)
+            return team
+        return []
+    except:
+        return []
+
+def ex_getspazzes():
+    spazzes = []
+    if bs.getnodes():
+        for node in bs.getnodes():
+            if node.getnodetype() == 'spaz':
+                spazzes.append(node)
+    return spazzes
+
+def ex_calculate(a, b, c=2):
+    try:
+        return round(a * b / 100, c)
+    except:
+        return 0
+
+def ex_petage(a, b, c=2):
+    try:
+        return round(100 * a / b, c)
+    except:
+        return 0
+
+def smb_eff(**kwargs):
+    for i in range(4):
+        Smb(i, **kwargs).autoretain()
+    bs.getsound('cheer').play()
+
+def ex_impulse(owner, msg):
+    if isinstance(msg, bs.HitMessage):
+        for i in range(2):
+            owner.handlemessage(
+                'impulse', msg.pos[0], msg.pos[1], msg.pos[2],
+                msg.velocity[0], msg.velocity[1]+2.0, msg.velocity[2],
+                msg.magnitude, msg.velocity_magnitude, msg.radius, 0,
+                msg.force_direction[0], msg.force_direction[1], msg.force_direction[2])
+
+def ex_getnodepos(nodes, x=5.0):
+    return (
+        (nodes[0].position[0] - nodes[1].position[0]) * x,
+        (nodes[0].position[1] - nodes[1].position[1]) * x,
+        (nodes[0].position[2] - nodes[1].position[2]) * x)
+
+def ex_getnodedis(nodes):
+    dis = [abs(nodes[0].position[0] - nodes[1].position[0]),
+           abs(nodes[0].position[2] - nodes[1].position[2])]
+    dis.sort(reverse=True)
+    return dis
+
+def ex_fake_explosion(position, radius=1.8, sound=True, color=(0.23,0.23,0.23)):
+    explosion = bs.newnode('explosion',
+        attrs={'position': position, 'color': color, 'radius': radius, 'big': False})
+    bs.timer(1.0, explosion.delete)
+    if sound:
+        sounds = ['explosion0'+str(n) for n in range(1,6)]
+        bs.getsound(random.choice(sounds)).play()
+
+def ex_health(cls_node, hp=0):
+    popup = lambda x: PopupText(text=x, color=(0.1,1.0,0.1), scale=1.5,
+        random_offset=0.0, position=cls_node.node.position).autoretain()
+    if cls_node.shield:
+        hp_max = cls_node.shield_hitpoints_max
+        if cls_node.shield_hitpoints >= hp_max:
+            hp = 35
+        cls_node.shield_hitpoints += hp
+        popup('+'+str(hp)+'SHP')
+    else:
+        hp_max = cls_node.hitpoints_max
+        if cls_node.hitpoints >= hp_max:
+            hp = 35
+        cls_node.hitpoints += hp
+        popup('+'+str(hp)+'HP')
+        bs.getsound('healthPowerup').play()
+
+def ex_electricity(node, owner):
+    cls_node = node.getdelegate(object)
+    def call(i):
+        if not node:
+            return
+        msg = bs.HitMessage(srcnode=owner, velocity=(0,0,0),
+                            flat_damage=ex.damage_eb, hit_subtype='electro')
+        node.handlemessage(msg)
+        if node.getnodetype() == 'spaz':
+            node.handlemessage('knockout', 100.0)
+            if ex.repeat_eb == i+1:
+                cls_node._eb_eff = False
+            PopupText(text='-'+str(msg.flat_damage)+'HP',
+                color=(0.8,0.1,0.1), scale=1.0,
+                random_offset=0.0, position=node.position).autoretain()
+    if node.getnodetype() == 'spaz':
+        cls_node._eb_eff = True
+    if not getattr(node, 'invincible', False):
+        for i in range(ex.repeat_eb):
+            bs.timer(2.0*(i+1), bs.Call(call, i))
+
+def ex_zap(node):
+    if not node:
+        return
+    def misil(loc):
+        a = (loc.position[0], 8.0, loc.position[2])
+        b = (0.0, -9.0, 0.0)
+        boom = bomb.Bomb(position=a, bomb_type='impact',
+            blast_radius=5.0, velocity=b, bomb_scale=2.38).autoretain()
+        boom.node.add_death_action(bs.Call(loc.delete))
+    loc = bs.newnode('locator', attrs={
+        'shape': 'circleOutline', 'position': node.position,
+        'color': (6,0,0), 'opacity': 0.3, 'size': [2.5],
+        'draw_beauty': False, 'additive': True})
+    bs.timer(0.7, bs.Call(misil, loc))
+
+def ex_supp(self):
+    nodes = []
+    for node in ex_getspazzes():
+        if self.node != node and node not in ex_get_team(self._player):
+            nodes.append(node)
+    for i, node in enumerate(nodes):
+        bs.timer(0.15*i, bs.Call(ex_zap, node))
+
+def ex_materials():
+    factory = pupbox.PowerupBoxFactory.get()
+    spazfactory = SpazFactory.get()
+    shared = SharedObjects.get()
+    powerup_material = bs.Material()
+    freeze_material = bs.Material()
+    xfactor_material1 = bs.Material()
+    xfactor_material2 = bs.Material()
+    no_pickup_material = bs.Material()
+    no_collision_material = bs.Material()
+    touch_material = bs.Material()
+    no_object_material = bs.Material()
+    collision_material = bs.Material()
+    no_object_material.add_actions(
+        conditions=('they_have_material', shared.object_material),
+        actions=(('modify_part_collision','collide',False),
+                 ('modify_part_collision','physical',False)))
+    no_collision_material.add_actions(
+        actions=(('modify_part_collision','collide',False),))
+    xfactor_material1.add_actions(
+        conditions=('they_have_material', shared.footing_material),
+        actions=(('modify_part_collision','collide',True),
+                 ('modify_part_collision','physical',True),
+                 ('message','our_node','at_connect',_TouchMessage())))
+    xfactor_material2.add_actions(
+        conditions=('they_have_material', shared.player_material),
+        actions=(('modify_part_collision','collide',True),
+                 ('modify_part_collision','physical',False),
+                 ('message','our_node','at_connect',ExplodeMessage())))
+    no_pickup_material.add_actions(
+        conditions=('they_have_material', shared.pickup_material),
+        actions=('modify_part_collision','collide',False))
+    powerup_material.add_actions(
+        conditions=('they_have_material', shared.pickup_material),
+        actions=('modify_part_collision','collide',False))
+    powerup_material.add_actions(
+        conditions=('they_have_material', factory.powerup_accept_material),
+        actions=(('modify_part_collision','collide',True),
+                 ('modify_part_collision','physical',False),
+                 ('message','our_node','at_connect',pupbox._TouchedMessage())))
+    collision_material.add_actions(
+        actions=(('modify_part_collision','collide',True),))
+    return [powerup_material, freeze_material, xfactor_material1,
+            xfactor_material2, no_pickup_material, no_collision_material,
+            touch_material, no_object_material, collision_material]
+
+def ex_materials_cb(callback):
+    shared = SharedObjects.get()
+    mat = bs.Material()
+    mat.add_actions(
+        conditions=('they_have_material', shared.player_material),
+        actions=(('modify_part_collision', 'collide', True),
+                 ('modify_part_collision', 'physical', False),
+                 ('call', 'at_connect', callback)))
+    return mat
+
+def ex_timer_in_nodes(node, time=5, call=None, callback=None, position=(0.0,0.7,0.0)):
+    if type(time) is not int:
+        raise TypeError("'"+str(time)+"' is not type 'int'")
+    time = [s+1 for s in range(int(time))]
+    time.sort(reverse=True)
+    time.append(0)
+    def text(i):
+        if not node:
+            return
+        if i != 0 and callable(call):
+            try: call(i)
+            except: call()
+        if i > 0:
+            c = tuple(max(random.random()*2, 0.3) for q in range(3))
+            m = bs.newnode('math', owner=node,
+                attrs={'input1': (position[0],position[1],position[2]),
+                       'operation': 'add'})
+            node.connectattr('position', m, 'input2')
+            popup = PopupText(text=str(i), color=c, scale=1.8,
+                random_offset=0.0, position=node.position).autoretain()
+            m.connectattr('output', popup.node, 'position')
+            bs.timer(1.0, babase.CallPartial(popup.handlemessage, bs.DieMessage()))
+        if i == 0 and callable(callback):
+            callback()
+    for i, n in enumerate(time):
+        bs.timer(0.0+i, babase.CallPartial(text, n))
+
+def ex_superhuman_health(self):
+    if self._dead or not self.node:
+        self.ex_superhuman_health_active = None
+        return
+    popup = lambda x: PopupText(text=x, color=(0.1,1.0,0.1), scale=1.5,
+        random_offset=0.0, position=self.node.position).autoretain()
+    tm = ex.time_sh / 2
+    if self.shield:
+        ex_shield = getattr(self, 'ex_shield_sh_color', None)
+        if self.shield.color == ex_shield and self.shield_hitpoints < 1000:
+            self.shield_hitpoints += ex.shield_hitpoints_sh
+            self.shield_hitpoints_max = self.shield_hitpoints
+            self.shield_hitpoints = min(self.shield_hitpoints, 1000)
+            popup('+'+str(ex.shield_hitpoints_sh)+'SHP')
+    else:
+        hp = self.hitpoints_max - self.hitpoints
+        cure = int(hp / 100 * ex.percentage_sh)
+        cure = max(cure, 25)
+        if self.hitpoints < self.hitpoints_max:
+            self.hitpoints = min(self.hitpoints+cure, self.hitpoints_max)
+            text = '+'+str(max(int(cure*100/self.hitpoints_max),1))+'%'
+            popup(text)
+            tm = ex.time_sh
+            bs.getsound('healthPowerup').play()
+        else:
+            self.equip_shields()
+            self.shield.color = (0.0, 1.0, 0.0)
+            self.shield_hitpoints = 0
+            self.ex_shield_sh_color = self.shield.color
+    bs.timer(tm, babase.CallPartial(ex_superhuman_health, self))
+
+def ex_super_shield(self):
+    if self._dead or not self.node or self.ex_super_shield_active is None:
+        self.ex_super_shield_active = None
+        return
+    def break_shield(self=self):
+        if self.shield:
+            ex_shield = getattr(self, 'ex_shield_ss_color', None)
+            if self.shield.color != ex_shield:
+                self.ex_super_shield_active = None
+                return
+        s = 100000000
+        damage = (s - self.shield_hitpoints)
+        if self.shield is not None:
+            self.shield.delete()
+            self.shield = None
+            self.ex_super_shield_active = None
+            bs.getsound('shieldDown').play()
+        self.shield_hitpoints = s
+        if damage > 0:
+            tank = int(damage - ex_calculate(damage, ex.reduction_ss))
+            msg = bs.HitMessage(srcnode=self.node, flat_damage=tank, velocity=(0,0,0))
+            self.node.handlemessage(msg)
+            text = '-'+str(int(ex_petage(tank, self.hitpoints_max)))+'%'
+            PopupText(text=text, random_offset=0.0,
+                color=(0.8,0.1,0.1), scale=1.5,
+                position=self.node.position).autoretain()
+    def blast(self=self):
+        ExBlast(owner=self.node, blast_radius=2.5,
+                blast_type='super_shield',
+                position=self.node.position,
+                velocity=(80.0,20.0,80.0),
+                source_player=self.source_player)
+    def all_calls():
+        break_shield()
+        blast()
+    if self.shield:
+        ex_shield = getattr(self, 'ex_shield_ss_color', None)
+        if self.shield.color != ex_shield:
+            self.shield.delete()
+            self.shield = None
+    else:
+        self.equip_shields()
+        self.shield.color = (1.2, 1.2, 0.0)
+        self.shield_hitpoints = 100000000
+        self.ex_shield_ss_color = self.shield.color
+        self.shield_hitpoints_max = self.shield_hitpoints
+        ex_timer_in_nodes(self.shield, time=ex.duration_ss,
+            callback=all_calls, position=(0.0,1.2,0.0))
+    bs.timer(0.5, babase.CallPartial(ex_super_shield, self))
+
+def ex_powerup_call(self, tag):
+    if tag == 's.m.b_bomb':
+        if 's.m.b' not in all_bombs:
+            all_bombs.append('s.m.b')
+        self.ex_bomb = 's.m.b'
+        self.ex_count_bomb = 1
+        tex = NewPowerupBoxFactory.get().tex_smb_bomb
+        self._flash_billboard(tex)
+    elif tag == 'cosmic_bomb':
+        if 'cosmic' not in all_bombs:
+            all_bombs.append('cosmic')
+        self.ex_bomb = 'cosmic'
+        self.ex_count_bomb = 1
+        tex = NewPowerupBoxFactory.get().tex_cosmic_bomb
+        self._flash_billboard(tex)
+    elif tag == 'electro-bombs':
+        if 'electro' not in all_bombs:
+            all_bombs.append('electro')
+        self.ex_bomb = 'electro'
+        tex = NewPowerupBoxFactory.get().tex_electro_bombs
+        self._flash_billboard(tex)
+    elif tag == 'cosmic_box':
+        if not getattr(self, 'cosmic_power', False):
+            self.cosmic_power = True
+            c = list(self.node.color)
+            c[1] = min(c[1] + 1.5, 3.0)
+            self.node.color = tuple(c)
+            tex = NewPowerupBoxFactory.get().tex_cosmic_box
+            self._flash_billboard(tex)
+            bs.timer(15.0, bs.WeakCall(_ex_cosmic_wear_off, self))
+    elif tag == 'Xfactor_bomb':
+        if 'Xfactor' not in all_bombs:
+            all_bombs.append('Xfactor')
+        self.ex_bomb = 'Xfactor'
+        self.ex_count_bomb = 2
+        tex = NewPowerupBoxFactory.get().tex_Xfactor_bomb
+        self._flash_billboard(tex)
+    elif tag == 'nitrogen_bomb':
+        if 'nitrogen' not in all_bombs:
+            all_bombs.append('nitrogen')
+        self.ex_bomb = 'nitrogen'
+        tex = NewPowerupBoxFactory.get().tex_nitrogen_bomb
+        self._flash_billboard(tex)
+    elif tag == 'stun_bomb':
+        if 'stun' not in all_bombs:
+            all_bombs.append('stun')
+        self.ex_bomb = 'stun'
+        tex = NewPowerupBoxFactory.get().tex_stun_bomb
+        self._flash_billboard(tex)
+    elif tag == 'attraction_bomb':
+        if 'attraction' not in all_bombs:
+            all_bombs.append('attraction')
+        self.ex_bomb = 'attraction'
+        self.ex_count_bomb = 2
+        tex = NewPowerupBoxFactory.get().tex_attraction_bomb
+        self._flash_billboard(tex)
+    elif tag == 'teleport_bomb':
+        if 'teleport' not in all_bombs:
+            all_bombs.append('teleport')
+        self.ex_bomb = 'teleport'
+        self.ex_count_bomb = 1
+        tex = NewPowerupBoxFactory.get().tex_teleport_bomb
+        self._flash_billboard(tex)
+    elif tag == 'gloo_wall_bomb':
+        if 'gloo' not in all_bombs:
+            all_bombs.append('gloo')
+        self.ex_bomb = 'gloo'
+        self.ex_count_bomb = 1
+        tex = NewPowerupBoxFactory.get().tex_gloo_wall_bomb
+        self._flash_billboard(tex)
+    elif tag == 'blackhole_bomb':
+        if 'blackhole' not in all_bombs:
+            all_bombs.append('blackhole')
+        self.ex_bomb = 'blackhole'
+        self.ex_count_bomb = 1
+        tex = NewPowerupBoxFactory.get().tex_blackhole_bomb
+        self._flash_billboard(tex)
+    elif tag == 'T784_bomb':
+        if 'T784' not in all_bombs:
+            all_bombs.append('T784')
+        self.ex_bomb = 'T784'
+        self.ex_count_bomb = 1
+        tex = NewPowerupBoxFactory.get().tex_T784_bomb
+        self._flash_billboard(tex)
+    elif tag == 'supplies':
+        ex_supp(self)
+    elif tag == 'super_shield':
+        if not getattr(self, 'ex_super_shield_active', None):
+            self.ex_super_shield_active = True
+            ex_super_shield(self)
+    elif tag == 'superhuman_healing':
+        if not getattr(self, 'ex_superhuman_health_active', None):
+            self.ex_superhuman_health_active = True
+            ex_superhuman_health(self)
+
+def ex_drop_bomb(self):
+    bomb_type = self.bomb_type
+    if getattr(self, 'ex_bomb', None):
+        bomb_type = self.ex_bomb
+    if bomb_type not in all_bombs:
+        return _original_drop_bomb(self)
+    if self.node.counter_text != '':
+        return _original_drop_bomb(self)
+    if (self.land_mine_count <= 0 and self.bomb_count <= 0) or self.frozen:
+        return None
+    assert self.node
+    pos = self.node.position_forward
+    vel = self.node.velocity
+    b = ExBomb(position=(pos[0], pos[1], pos[2]),
+               velocity=(vel[0], vel[1], vel[2]),
+               bomb_scale=1.0, bomb_type=bomb_type,
+               blast_radius=self.blast_radius,
+               source_player=self.source_player,
+               owner=self.node).autoretain()
+    assert b.node
+    if getattr(self, 'ex_count_bomb', 0) > 0:
+        self.ex_count_bomb -= 1
+        PopupText(text='x'+str(self.ex_count_bomb),
+            color=(0.1,1.0,0.1), scale=1.8,
+            random_offset=0.0, position=self.node.position).autoretain()
+        if self.ex_count_bomb < 1:
+            del self.ex_bomb
+    else:
+        self.bomb_count -= 1
+        b.node.add_death_action(
+            babase.CallPartial(self.handlemessage, BombDiedMessage()))
+    self._pick_up(b.node)
+    for clb in self._dropped_bomb_callbacks:
+        clb(self, b)
+    return b
 
 def enable():
-    # browser.ProfileBrowserWindow = NewProfileBrowserWindow
+    global _original_drop_bomb
     pupbox.PowerupBoxFactory = NewPowerupBoxFactory
     pupbox.PowerupBox.__init__ = _pbx_
     Bomb.__init__ = _bomb_init
@@ -2772,4 +4219,8 @@ def enable():
     Spaz._get_bomb_type_tex = new_get_bomb_type_tex
     Spaz.on_punch_press = spaz_on_punch_press
     Spaz.on_punch_release = spaz_on_punch_release
+    _original_drop_bomb = Spaz.drop_bomb
+    Spaz.drop_bomb = ex_drop_bomb
+    Spaz.ex_powerup_call = ex_powerup_call
     MainMenuActivity.on_transition_in = new_on_transition_in
+
